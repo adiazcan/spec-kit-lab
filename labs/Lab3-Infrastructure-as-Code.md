@@ -189,6 +189,31 @@ terraform apply
 az resource list --resource-group adventure-game-dev-rg --output table
 ```
 
+#### 🔀 Git: Commit and Merge Module 1
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G` / `Cmd+Shift+G`)
+2. Review changed files in the "Changes" section
+3. Click `+` next to each file (or `+` on "Changes" header to stage all)
+4. Enter commit message: `infra: implement core Azure infrastructure`
+5. Click **Commit** button (checkmark icon)
+6. Click **Sync Changes** or **Push** in the status bar
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "infra: implement core Azure infrastructure
+
+- Add Resource Group with proper tagging
+- Create Virtual Network with app and database subnets
+- Configure Network Security Groups
+- Set up Terraform state backend"
+
+git push origin main
+```
+
 ---
 
 ### Module 2: Security Infrastructure
@@ -238,6 +263,29 @@ terraform apply
 
 # Verify Key Vault
 az keyvault show --name adventure-kv-dev --resource-group adventure-game-dev-rg
+```
+
+#### 🔀 Git: Commit and Merge Module 2
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `infra: implement security infrastructure`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "infra: implement security infrastructure
+
+- Add Azure Key Vault with access policies
+- Configure Managed Identities
+- Set up diagnostic settings for logging
+- Implement private endpoints (optional)"
+
+git push origin main
 ```
 
 ---
@@ -296,6 +344,30 @@ az webapp show --name adventure-api-dev --resource-group adventure-game-dev-rg -
 az postgres flexible-server show --name adventure-db-dev --resource-group adventure-game-dev-rg
 ```
 
+#### 🔀 Git: Commit and Merge Module 3
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `infra: implement backend infrastructure`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "infra: implement backend infrastructure
+
+- Add App Service Plan and App Service
+- Create PostgreSQL Flexible Server
+- Store connection string in Key Vault
+- Configure Application Insights
+- Set up managed identity"
+
+git push origin main
+```
+
 ---
 
 ### Module 4: Frontend Infrastructure
@@ -347,6 +419,29 @@ terraform apply
 terraform output static_web_app_url
 ```
 
+#### 🔀 Git: Commit and Merge Module 4
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `infra: implement frontend infrastructure`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "infra: implement frontend infrastructure
+
+- Add Azure Static Web App
+- Configure API URL environment variable
+- Set up staging environment
+- Add CDN profile (optional)"
+
+git push origin main
+```
+
 ---
 
 ### Module 5: CI/CD Infrastructure (Optional)
@@ -395,6 +490,29 @@ terraform apply
 
 # Verify Service Principal
 az ad sp list --display-name adventure-game-github-sp --output table
+```
+
+#### 🔀 Git: Commit and Merge Module 5
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `infra: implement CI/CD infrastructure`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "infra: implement CI/CD infrastructure
+
+- Create Service Principal for GitHub Actions
+- Configure role assignments
+- Document required GitHub secrets
+- Generate deployment tokens"
+
+git push origin main
 ```
 
 ---

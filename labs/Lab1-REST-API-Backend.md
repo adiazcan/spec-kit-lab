@@ -179,6 +179,31 @@ curl -X POST http://localhost:3000/api/dice/roll \
   -d '{"expression": "2d6+3"}'
 ```
 
+#### 🔀 Git: Commit and Merge Feature 1
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G` / `Cmd+Shift+G`)
+2. Review changed files in the "Changes" section
+3. Click `+` next to each file (or `+` on "Changes" header to stage all)
+4. Enter commit message: `feat: implement dice rolling system`
+5. Click **Commit** button (checkmark icon)
+6. Click **Sync Changes** or **Push** in the status bar
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "feat: implement dice rolling system
+
+- Add dice notation parser (2d6, 1d20+5, etc.)
+- Implement advantage/disadvantage rolls
+- Add cryptographically secure random generation
+- Include unit tests for dice mechanics"
+
+git push origin main
+```
+
 ---
 
 ### Feature 2: Adventure System
@@ -225,6 +250,29 @@ curl -X POST http://localhost:3000/api/adventures \
 
 # List adventures
 curl -X GET http://localhost:3000/api/adventures
+```
+
+#### 🔀 Git: Commit and Merge Feature 2
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `feat: implement adventure system`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "feat: implement adventure system
+
+- Add Adventure entity with CRUD operations
+- Implement scene management
+- Add game state persistence
+- Generate OpenAPI documentation"
+
+git push origin main
 ```
 
 ---
@@ -275,6 +323,29 @@ curl -X GET http://localhost:3000/api/adventures
 curl -X POST http://localhost:3000/api/adventures/{adventureId}/characters \
   -H "Content-Type: application/json" \
   -d '{"name": "Aldric", "str": 16, "dex": 14, "int": 10, "con": 15, "cha": 12}'
+```
+
+#### 🔀 Git: Commit and Merge Feature 3
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `feat: implement character management system`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "feat: implement character management system
+
+- Add Character entity with attributes (STR, DEX, INT, CON, CHA)
+- Implement modifier calculation
+- Add character versioning/snapshots
+- Link characters to adventures"
+
+git push origin main
 ```
 
 ---
@@ -330,6 +401,29 @@ curl -X POST http://localhost:3000/api/characters/{characterId}/inventory \
 curl -X POST http://localhost:3000/api/characters/{characterId}/equip \
   -H "Content-Type: application/json" \
   -d '{"itemId": "sword-01", "slot": "main_hand"}'
+```
+
+#### 🔀 Git: Commit and Merge Feature 4
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `feat: implement inventory system`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "feat: implement inventory system
+
+- Add Item and Inventory entities
+- Implement equipment slots (head, chest, hands, etc.)
+- Add stackable/unique item logic
+- Create loot tables with dice integration"
+
+git push origin main
 ```
 
 ---
@@ -388,6 +482,29 @@ curl -X POST http://localhost:3000/api/adventures/{adventureId}/combat/turn \
   -d '{"action": "attack", "targetId": "goblin-01"}'
 ```
 
+#### 🔀 Git: Commit and Merge Feature 5
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `feat: implement turn-based combat system`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "feat: implement turn-based combat system
+
+- Add NPC/Enemy entities with AI states
+- Implement initiative system using dice
+- Add attack rolls and damage calculation
+- Create combat resolver with turn management"
+
+git push origin main
+```
+
 ---
 
 ### Feature 6: Quest System
@@ -438,6 +555,29 @@ curl -X GET http://localhost:3000/api/adventures/{adventureId}/quests
 
 # Accept quest
 curl -X POST http://localhost:3000/api/adventures/{adventureId}/quests/{questId}/accept
+```
+
+#### 🔀 Git: Commit and Merge Feature 6
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `feat: implement quest system`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "feat: implement quest system
+
+- Add Quest and QuestStage entities
+- Implement multi-stage progress tracking
+- Add quest dependencies graph
+- Integrate rewards with inventory system"
+
+git push origin main
 ```
 
 ---

@@ -160,6 +160,31 @@ For each feature, follow the complete Spec Kit workflow:
 - [ ] Can select adventure to play
 - [ ] Delete shows confirmation
 
+#### 🔀 Git: Commit and Merge Feature 1
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G` / `Cmd+Shift+G`)
+2. Review changed files in the "Changes" section
+3. Click `+` next to each file (or `+` on "Changes" header to stage all)
+4. Enter commit message: `feat: implement adventure dashboard`
+5. Click **Commit** button (checkmark icon)
+6. Click **Sync Changes** or **Push** in the status bar
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "feat: implement adventure dashboard
+
+- Add adventure list with API integration
+- Implement create/delete adventure flows
+- Add loading skeletons and error states
+- Configure environment variables"
+
+git push origin main
+```
+
 ---
 
 ### Feature 2: Character Management UI
@@ -209,6 +234,29 @@ For each feature, follow the complete Spec Kit workflow:
 - [ ] Attributes can be allocated
 - [ ] Modifiers display correctly
 - [ ] Character sheet shows all stats
+
+#### 🔀 Git: Commit and Merge Feature 2
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `feat: implement character management UI`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "feat: implement character management UI
+
+- Add character creation form with validation
+- Implement attribute allocation system
+- Display calculated modifiers
+- Create character sheet view"
+
+git push origin main
+```
 
 ---
 
@@ -260,6 +308,30 @@ For each feature, follow the complete Spec Kit workflow:
 - [ ] Character status shows correctly
 - [ ] Combat mode works
 
+#### 🔀 Git: Commit and Merge Feature 3
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `feat: implement main game interface`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "feat: implement main game interface
+
+- Add narrative display with scrollable history
+- Implement command input with history
+- Create character status panel
+- Add combat mode with turn indicators
+- Implement dice roll animations"
+
+git push origin main
+```
+
 ---
 
 ### Feature 4: Inventory UI
@@ -310,6 +382,30 @@ For each feature, follow the complete Spec Kit workflow:
 - [ ] Equip/unequip works
 - [ ] Stacks show quantities
 
+#### 🔀 Git: Commit and Merge Feature 4
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `feat: implement inventory UI`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "feat: implement inventory UI
+
+- Add inventory grid/list view
+- Implement item details modal
+- Create equipment slots visualization
+- Add equip/unequip functionality
+- Implement sort and filter options"
+
+git push origin main
+```
+
 ---
 
 ### Feature 5: Quest Log
@@ -358,6 +454,29 @@ For each feature, follow the complete Spec Kit workflow:
 - [ ] Quest details show objectives
 - [ ] Progress indicators work
 - [ ] Filters function correctly
+
+#### 🔀 Git: Commit and Merge Feature 5
+
+**Option A: Using VS Code**
+
+1. Open **Source Control** panel (`Ctrl+Shift+G`)
+2. Stage all changes with `+`
+3. Commit message: `feat: implement quest log UI`
+4. Click **Commit** then **Sync Changes**
+
+**Option B: Using Terminal**
+
+```bash
+git add .
+git commit -m "feat: implement quest log UI
+
+- Add quest list with status filters
+- Implement quest detail view
+- Create progress indicators
+- Add completed quests history"
+
+git push origin main
+```
 
 ---
 
