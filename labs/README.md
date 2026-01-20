@@ -1,0 +1,102 @@
+# 🧙‍♂️ Text Adventure Game Labs
+
+Welcome to the Text Adventure Game development challenge! These labs guide you through building a complete text adventure game using **GitHub Spec Kit** for Spec-Driven Development.
+
+## 📚 Labs Overview
+
+| Lab                                     | Name                                | Description                                  | Duration    |
+| --------------------------------------- | ----------------------------------- | -------------------------------------------- | ----------- |
+| [Lab 1](Lab1-REST-API-Backend.md)       | The Library at the End of the World | Build a REST API backend with OpenAPI 3.0.1  | 2-3 hours   |
+| [Lab 2](Lab2-Frontend-Application.md)   | The Voice of the Narrator           | Build an interactive text adventure frontend | 1.5-2 hours |
+| [Lab 3](Lab3-Infrastructure-as-Code.md) | The Plane of the Kingdom            | Deploy to Azure using Terraform              | 1.5-2 hours |
+
+## 🎮 The Challenge
+
+Teams will be divided into **two companies**. Before the first challenge, a coin flip determines which team gets to use **GitHub Copilot**.
+
+| Challenge              | Team A                    | Team B                    |
+| ---------------------- | ------------------------- | ------------------------- |
+| Lab 1 (API)            | 🪙 Coin flip determines   | 🪙 Coin flip determines   |
+| Lab 2 (Frontend)       | Roles reversed            | Roles reversed            |
+| Lab 3 (Infrastructure) | ✅ Both teams use Copilot | ✅ Both teams use Copilot |
+
+## 🛠️ Technology Stack
+
+### Lab 1: Backend
+
+- **Languages:** C# or TypeScript
+- **Specification:** OpenAPI 3.0.1 (Swagger)
+- **Database:** PostgreSQL
+- **Auth:** JWT tokens
+
+### Lab 2: Frontend
+
+- **Framework:** Your choice (React, Vue, Svelte, or Vanilla JS)
+- **Build Tool:** Vite recommended
+- **Styling:** Your choice
+
+### Lab 3: Infrastructure
+
+- **IaC Tool:** Terraform
+- **Cloud Provider:** Azure
+- **Pattern:** Modules + Environments
+
+## 🚀 Getting Started with GitHub Spec Kit
+
+All labs use GitHub Spec Kit for Spec-Driven Development. Here's the quick start:
+
+```bash
+# Install the CLI
+uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+
+# Initialize a project
+specify init my-project --ai copilot
+
+# Core workflow commands:
+/speckit.constitution   # Define project principles
+/speckit.specify        # Create feature specifications
+/speckit.plan           # Generate implementation plan
+/speckit.tasks          # Break down into tasks
+/speckit.implement      # Execute the implementation
+```
+
+## 📋 Evaluation Criteria
+
+### Lab 1: REST API Backend
+
+| Criteria                      | Weight |
+| ----------------------------- | ------ |
+| Text Adventure Enjoyability   | 20%    |
+| Security Implementation       | 25%    |
+| API Documentation (OpenAPI)   | 20%    |
+| Best Practices & Code Quality | 20%    |
+| Test Coverage                 | 15%    |
+
+### Lab 2: Frontend Application
+
+| Criteria                | Weight |
+| ----------------------- | ------ |
+| API Integration         | 25%    |
+| Security Implementation | 25%    |
+| Code Documentation      | 20%    |
+| User Experience         | 15%    |
+| Code Quality            | 15%    |
+
+### Lab 3: Infrastructure as Code
+
+| Criteria                             | Weight |
+| ------------------------------------ | ------ |
+| Security Implementation              | 30%    |
+| Documentation Quality                | 25%    |
+| Best Practices (Modules, State, DRY) | 25%    |
+| Successful Deployment                | 20%    |
+
+## 📖 Resources
+
+- [GitHub Spec Kit Documentation](https://speckit.org/)
+- [OpenAPI 3.0.1 Specification](https://swagger.io/specification/)
+- [Terraform Azure Provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
+
+---
+
+**Good luck, adventurers! May your code be clean and your specs be clear! 🎲⚔️**
