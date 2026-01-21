@@ -105,3 +105,13 @@ Special regard will be given to codices that demonstrate mastery in:
 - 🔐 Deployment security
 - 📜 Clear documentation
 - 🛠️ Fidelity to best practices of the craft
+
+---
+
+## 📜 The Sacred Scrolls
+
+When you are ready to embark upon your quest, seek the **ancient tomes** that hold the wisdom of each trial.
+
+Within these scrolls lie the secrets, incantations, and guidance you shall need to conquer each challenge and emerge victorious.
+
+**[⚔️ Enter the Hall of Knowledge](labs/README.md)** — _May your code be swift and your bugs be few._
