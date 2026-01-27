@@ -32,24 +32,24 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateAdventureRequest'
+              $ref: "#/components/schemas/CreateAdventureRequest"
             examples:
               basic:
                 summary: Basic adventure creation
                 value:
-                  initialSceneId: 'scene_tavern_start'
+                  initialSceneId: "scene_tavern_start"
               withState:
                 summary: Adventure with initial game state
                 value:
-                  initialSceneId: 'scene_tavern_start'
+                  initialSceneId: "scene_tavern_start"
                   initialGameState:
                     inventory:
-                      - 'dagger'
-                      - 'scroll'
+                      - "dagger"
+                      - "scroll"
                     health: 100
                     gold: 50
       responses:
-        '201':
+        "201":
           description: Adventure created successfully
           headers:
             Location:
@@ -59,32 +59,32 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Adventure'
+                $ref: "#/components/schemas/Adventure"
               example:
-                id: '550e8400-e29b-41d4-a716-446655440000'
-                currentSceneId: 'scene_tavern_start'
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                currentSceneId: "scene_tavern_start"
                 gameState:
                   inventory:
-                    - 'dagger'
+                    - "dagger"
                   health: 100
                   gold: 50
-                createdAt: '2026-01-27T10:30:00Z'
-                lastUpdatedAt: '2026-01-27T10:30:00Z'
-        '400':
+                createdAt: "2026-01-27T10:30:00Z"
+                lastUpdatedAt: "2026-01-27T10:30:00Z"
+        "400":
           description: Invalid request (missing required fields)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
-                message: 'InitialSceneId is required'
+                message: "InitialSceneId is required"
                 statusCode: 400
-        '413':
+        "413":
           description: Game state payload too large (max 1MB)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
     get:
       tags:
@@ -112,31 +112,31 @@ paths:
             maximum: 100
           description: Maximum adventures per page (max 100)
       responses:
-        '200':
+        "200":
           description: List of adventures retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PagedAdventureResponse'
+                $ref: "#/components/schemas/PagedAdventureResponse"
               example:
                 adventures:
-                  - id: '550e8400-e29b-41d4-a716-446655440000'
-                    currentSceneId: 'scene_tavern_start'
+                  - id: "550e8400-e29b-41d4-a716-446655440000"
+                    currentSceneId: "scene_tavern_start"
                     gameState:
                       inventory: []
                       health: 100
-                    createdAt: '2026-01-27T10:30:00Z'
-                    lastUpdatedAt: '2026-01-27T10:30:00Z'
+                    createdAt: "2026-01-27T10:30:00Z"
+                    lastUpdatedAt: "2026-01-27T10:30:00Z"
                 total: 42
                 page: 1
                 limit: 20
                 hasMore: true
-        '400':
+        "400":
           description: Invalid pagination parameters
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
   /api/adventures/{id}:
     get:
@@ -155,22 +155,22 @@ paths:
             type: string
             format: uuid
           description: Adventure unique identifier
-          example: '550e8400-e29b-41d4-a716-446655440000'
+          example: "550e8400-e29b-41d4-a716-446655440000"
       responses:
-        '200':
+        "200":
           description: Adventure retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Adventure'
-        '404':
+                $ref: "#/components/schemas/Adventure"
+        "404":
           description: Adventure not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
-                message: 'Adventure not found'
+                message: "Adventure not found"
                 statusCode: 404
 
     put:
@@ -195,50 +195,50 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateAdventureRequest'
+              $ref: "#/components/schemas/UpdateAdventureRequest"
             examples:
               sceneOnly:
                 summary: Update current scene only
                 value:
-                  currentSceneId: 'scene_forest_entrance'
+                  currentSceneId: "scene_forest_entrance"
                   gameState: {}
               fullState:
                 summary: Update scene and game state
                 value:
-                  currentSceneId: 'scene_forest_entrance'
+                  currentSceneId: "scene_forest_entrance"
                   gameState:
                     inventory:
-                      - 'dagger'
-                      - 'herb'
+                      - "dagger"
+                      - "herb"
                     health: 95
                     visited_scenes:
-                      - 'scene_tavern_start'
-                      - 'scene_forest_entrance'
+                      - "scene_tavern_start"
+                      - "scene_forest_entrance"
       responses:
-        '200':
+        "200":
           description: Adventure updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Adventure'
-        '400':
+                $ref: "#/components/schemas/Adventure"
+        "400":
           description: Invalid request (missing required fields)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
           description: Adventure not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '413':
+                $ref: "#/components/schemas/ErrorResponse"
+        "413":
           description: Game state payload too large
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
     delete:
       tags:
@@ -257,14 +257,14 @@ paths:
             format: uuid
           description: Adventure unique identifier
       responses:
-        '204':
+        "204":
           description: Adventure deleted successfully
-        '404':
+        "404":
           description: Adventure not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
   schemas:
@@ -282,13 +282,13 @@ components:
           type: string
           format: uuid
           description: Unique adventure identifier (server-generated, immutable)
-          example: '550e8400-e29b-41d4-a716-446655440000'
+          example: "550e8400-e29b-41d4-a716-446655440000"
         currentSceneId:
           type: string
           minLength: 1
           maxLength: 100
           description: Currently active scene identifier (e.g., 'scene_tavern_start')
-          example: 'scene_tavern_start'
+          example: "scene_tavern_start"
         gameState:
           type: object
           description: >
@@ -298,12 +298,12 @@ components:
           additionalProperties: true
           example:
             inventory:
-              - 'dagger'
-              - 'scroll'
+              - "dagger"
+              - "scroll"
             health: 100
             gold: 50
             visited_scenes:
-              - 'scene_tavern_start'
+              - "scene_tavern_start"
             quest_flags:
               merchant_quest_accepted: true
               dragon_defeated: false
@@ -311,12 +311,12 @@ components:
           type: string
           format: date-time
           description: When the adventure was initialized (ISO 8601, UTC)
-          example: '2026-01-27T10:30:00Z'
+          example: "2026-01-27T10:30:00Z"
         lastUpdatedAt:
           type: string
           format: date-time
           description: When the adventure was last modified (ISO 8601, UTC)
-          example: '2026-01-27T10:35:00Z'
+          example: "2026-01-27T10:35:00Z"
 
     CreateAdventureRequest:
       type: object
@@ -329,8 +329,8 @@ components:
           minLength: 1
           maxLength: 100
           description: Starting scene identifier
-          example: 'scene_tavern_start'
-          default: 'scene_start'
+          example: "scene_tavern_start"
+          default: "scene_start"
         initialGameState:
           type: object
           nullable: true
@@ -354,7 +354,7 @@ components:
           minLength: 1
           maxLength: 100
           description: New active scene identifier
-          example: 'scene_forest_entrance'
+          example: "scene_forest_entrance"
         gameState:
           type: object
           nullable: true
@@ -364,8 +364,8 @@ components:
           additionalProperties: true
           example:
             inventory:
-              - 'dagger'
-              - 'herb'
+              - "dagger"
+              - "herb"
             health: 95
             gold: 50
 
@@ -383,7 +383,7 @@ components:
           type: array
           description: Array of adventure objects for current page
           items:
-            $ref: '#/components/schemas/Adventure'
+            $ref: "#/components/schemas/Adventure"
         total:
           type: integer
           description: Total number of adventures across all pages
@@ -411,7 +411,7 @@ components:
         message:
           type: string
           description: Human-readable error description
-          example: 'Adventure not found'
+          example: "Adventure not found"
         statusCode:
           type: integer
           description: HTTP status code
@@ -428,21 +428,21 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
 
     BadRequest:
       description: Invalid request
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
 
     PayloadTooLarge:
       description: Request body exceeds size limit
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: "#/components/schemas/ErrorResponse"
 
 tags:
   - name: Adventures
@@ -455,10 +455,10 @@ x-additionalInfo:
   compatibleWith:
     - DiceEngine API v1.0.0
   constraints:
-    maxGameStateSize: '1 MB'
+    maxGameStateSize: "1 MB"
     maxSceneIdLength: 100
     paginationMaxLimit: 100
-    httpTimeout: '200ms p95'
+    httpTimeout: "200ms p95"
   futureEnhancements:
     - Concurrency control via RowVersion (optimistic locking)
     - Advanced filtering on game state fields
