@@ -1,0 +1,12 @@
+namespace DiceEngine.Application.Models;
+
+public sealed class StatsResult
+{
+    public string Expression { get; init; } = string.Empty;
+    public int Minimum { get; init; }
+    public int Maximum { get; init; }
+    public double Mean { get; init; }
+    public double StandardDeviation { get; init; }
+    public int? Mode { get; init; }
+    public int? Median { get; init; }
+}

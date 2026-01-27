@@ -1,0 +1,643 @@
+openapi: 3.0.1
+info:
+  title: Dice Rolling Engine API
+  description: |
+    A cryptographically secure dice rolling service supporting standard RPG dice notation,
+    complex expressions, and advantage/disadvantage mechanics.
+  version: 1.0.0
+  contact:
+    name: Game Development Team
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:5000
+    description: Development server
+  - url: https://api.game.local
+    description: Production server
+
+tags:
+  - name: Rolls
+    description: Dice rolling operations
+
+paths:
+  /api/roll:
+    post:
+      tags:
+        - Rolls
+      summary: Roll dice using standard RPG notation
+      operationId: rollDice
+      description: |
+        Parses a dice notation string and performs a cryptographically secure random roll.
+
+        Supports:
+        - Basic notation: "2d6", "1d20+5", "3d8-2"
+        - Complex expressions: "2d6+1d4+3"
+        - Advantage: "2d6a" (roll twice, use higher)
+        - Disadvantage: "2d6d" (roll twice, use lower)
+
+        **Performance**: Guaranteed <50ms response time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RollRequest"
+            examples:
+              basicRoll:
+                summary: Basic dice roll
+                value:
+                  expression: "2d6"
+              modifiedRoll:
+                summary: Roll with modifier
+                value:
+                  expression: "1d20+5"
+              complexExpression:
+                summary: Multiple dice groups and modifiers
+                value:
+                  expression: "2d6+1d4+3"
+              advantageRoll:
+                summary: Advantage roll (highest of two)
+                value:
+                  expression: "1d20a"
+              disadvantageRoll:
+                summary: Disadvantage roll (lowest of two)
+                value:
+                  expression: "1d20d"
+      responses:
+        "200":
+          description: Roll successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RollResponse"
+              examples:
+                successExample:
+                  summary: Successful roll outcome
+                  value:
+                    success: true
+                    data:
+                      expression: "2d6+5"
+                      individualRolls: [3, 5]
+                      rollsByGroup:
+                        "2d6": [3, 5]
+                      subtotalsByGroup:
+                        "2d6": 8
+                      totalModifier: 5
+                      finalTotal: 13
+                      isAdvantage: false
+                      isDisadvantage: false
+                      advantageRollResults: null
+                      timestamp: "2026-01-27T10:30:00Z"
+                      metadata:
+                        executionTimeMs: 0.45
+                        rngAlgorithm: "RNGCryptoServiceProvider"
+                        isCached: false
+                    error: null
+                    timestamp: "2026-01-27T10:30:00Z"
+        "400":
+          description: Invalid dice expression
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidNotation:
+                  summary: Malformed dice notation
+                  value:
+                    success: false
+                    data: null
+                    error:
+                      code: INVALID_EXPRESSION
+                      message: "Expression '2x6' is invalid. Expected format: NdS±M (e.g., 2d6, 1d20+5)"
+                      details:
+                        position: 1
+                        expected: "digit"
+                        actual: "x"
+                    timestamp: "2026-01-27T10:30:00Z"
+                conflictingFlags:
+                  summary: Both advantage and disadvantage specified
+                  value:
+                    success: false
+                    data: null
+                    error:
+                      code: CONFLICTING_FLAGS
+                      message: "Cannot specify both advantage and disadvantage"
+                      details: null
+                    timestamp: "2026-01-27T10:30:00Z"
+                outOfBounds:
+                  summary: Invalid dice parameters
+                  value:
+                    success: false
+                    data: null
+                    error:
+                      code: INVALID_PARAMETERS
+                      message: "Number of dice must be >= 1. Received: 0"
+                      details:
+                        field: "NumberOfDice"
+                        value: "0"
+                        constraint: ">= 1"
+                    timestamp: "2026-01-27T10:30:00Z"
+        "500":
+          description: Internal server error (unexpected)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                serverError:
+                  summary: Unexpected server error
+                  value:
+                    success: false
+                    data: null
+                    error:
+                      code: INTERNAL_ERROR
+                      message: "An unexpected error occurred. Please contact support."
+                      details: null
+                    timestamp: "2026-01-27T10:30:00Z"
+
+  /api/roll/validate:
+    post:
+      tags:
+        - Rolls
+      summary: Validate a dice expression without rolling
+      operationId: validateExpression
+      description: |
+        Parses and validates a dice expression without performing the roll.
+        Useful for checking user input before committing to a roll.
+
+        **Performance**: Guaranteed <30ms response time (no RNG)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateRequest"
+            examples:
+              validExpression:
+                summary: Valid expression
+                value:
+                  expression: "2d6+1d4+3"
+              invalidExpression:
+                summary: Invalid expression
+                value:
+                  expression: "2x6"
+      responses:
+        "200":
+          description: Validation result (valid or invalid)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidateResponse"
+              examples:
+                validExample:
+                  summary: Expression is valid
+                  value:
+                    success: true
+                    data:
+                      isValid: true
+                      originalExpression: "2d6+1d4+3"
+                      parsedComponents:
+                        diceRolls:
+                          - numberOfDice: 2
+                            sidesPerDie: 6
+                            modifier: 0
+                          - numberOfDice: 1
+                            sidesPerDie: 4
+                            modifier: 0
+                        globalModifier: 3
+                        hasAdvantage: false
+                        hasDisadvantage: false
+                      expectedMinimum: 5
+                      expectedMaximum: 19
+                      message: null
+                    error: null
+                    timestamp: "2026-01-27T10:30:00Z"
+                invalidExample:
+                  summary: Expression is invalid
+                  value:
+                    success: true
+                    data:
+                      isValid: false
+                      originalExpression: "2x6"
+                      parsedComponents: null
+                      expectedMinimum: null
+                      expectedMaximum: null
+                      message: "Expression '2x6' is invalid. Expected format: NdS±M (e.g., 2d6, 1d20+5)"
+                    error: null
+                    timestamp: "2026-01-27T10:30:00Z"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/roll/stats/{expression}:
+    get:
+      tags:
+        - Rolls
+      summary: Get statistical information about a dice expression
+      operationId: getExpressionStats
+      description: |
+        Returns expected range, mean, and standard deviation for a dice expression
+        without performing a roll. Useful for game balance analysis.
+
+        **Note**: This endpoint does not perform RNG operations.
+      parameters:
+        - name: expression
+          in: path
+          description: Dice expression (e.g., "2d6+5")
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+            example: "2d6+5"
+      responses:
+        "200":
+          description: Statistical analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsResponse"
+              examples:
+                statsExample:
+                  summary: Statistics for 2d6+5
+                  value:
+                    success: true
+                    data:
+                      expression: "2d6+5"
+                      minimum: 7
+                      maximum: 17
+                      mean: 12
+                      standardDeviation: 2.415
+                      mode: 12
+                      median: 12
+                    error: null
+                    timestamp: "2026-01-27T10:30:00Z"
+        "400":
+          description: Invalid expression
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    RollRequest:
+      type: object
+      required:
+        - expression
+      properties:
+        expression:
+          type: string
+          minLength: 3
+          maxLength: 255
+          description: |
+            Dice notation expression. Format: [NdS±M][flag]
+            - N: number of dice (1-1000)
+            - S: sides per die (1-1000)
+            - M: optional modifier (+/- value)
+            - flag: optional 'a' (advantage) or 'd' (disadvantage)
+          examples:
+            - "2d6"
+            - "1d20+5"
+            - "3d8-2"
+            - "2d6+1d4+3"
+            - "1d20a"
+            - "1d20d"
+
+    RollData:
+      type: object
+      required:
+        - expression
+        - individualRolls
+        - finalTotal
+        - isAdvantage
+        - isDisadvantage
+        - timestamp
+        - metadata
+      properties:
+        expression:
+          type: string
+          description: Original expression string for reference
+          example: "2d6+5"
+        individualRolls:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          description: All individual dice roll values in order
+          example: [3, 5]
+        rollsByGroup:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: integer
+          description: Rolls grouped by dice group (e.g., "2d6" => [3, 5])
+          example: { "2d6": [3, 5] }
+        subtotalsByGroup:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Subtotals before global modifiers
+          example: { "2d6": 8 }
+        totalModifier:
+          type: integer
+          description: Sum of all modifiers applied
+          example: 5
+        finalTotal:
+          type: integer
+          description: Final result (sum of all rolls + modifiers)
+          example: 13
+        isAdvantage:
+          type: boolean
+          description: Whether this was an advantage roll (highest of two)
+          example: false
+        isDisadvantage:
+          type: boolean
+          description: Whether this was a disadvantage roll (lowest of two)
+          example: false
+        advantageRollResults:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/RollData"
+          description: If advantage/disadvantage, both outcome rolls included for transparency
+          example: null
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 UTC timestamp of roll
+          example: "2026-01-27T10:30:00Z"
+        metadata:
+          $ref: "#/components/schemas/RollMetadata"
+
+    RollMetadata:
+      type: object
+      required:
+        - executionTimeMs
+        - rngAlgorithm
+        - isCached
+      properties:
+        executionTimeMs:
+          type: number
+          format: double
+          minimum: 0
+          description: Time taken to execute roll (milliseconds)
+          example: 0.45
+        rngAlgorithm:
+          type: string
+          description: Cryptographic RNG algorithm used
+          enum:
+            - "RNGCryptoServiceProvider"
+          example: "RNGCryptoServiceProvider"
+        isCached:
+          type: boolean
+          description: Whether result was retrieved from cache (MVP = always false)
+          example: false
+
+    RollResponse:
+      type: object
+      required:
+        - success
+        - data
+        - error
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded
+          example: true
+        data:
+          allOf:
+            - $ref: "#/components/schemas/RollData"
+          nullable: true
+          description: Roll result (null if error)
+        error:
+          allOf:
+            - $ref: "#/components/schemas/ErrorDetail"
+          nullable: true
+          description: Error details (null if success)
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 UTC timestamp of response
+          example: "2026-01-27T10:30:00Z"
+
+    ErrorDetail:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - "INVALID_EXPRESSION"
+            - "INVALID_PARAMETERS"
+            - "CONFLICTING_FLAGS"
+            - "INTERNAL_ERROR"
+            - "VALIDATION_FAILED"
+          description: Machine-readable error code for client handling
+          example: "INVALID_EXPRESSION"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Expression '2x6' is invalid. Expected format: NdS±M (e.g., 2d6, 1d20+5)"
+        details:
+          type: object
+          nullable: true
+          description: Additional context-specific error details
+          example:
+            position: 1
+            expected: "digit"
+            actual: "x"
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - data
+        - error
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          const: false
+          example: false
+        data:
+          type: null
+          nullable: true
+        error:
+          $ref: "#/components/schemas/ErrorDetail"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-01-27T10:30:00Z"
+
+    ValidateRequest:
+      type: object
+      required:
+        - expression
+      properties:
+        expression:
+          type: string
+          minLength: 3
+          maxLength: 255
+          description: Dice expression to validate
+          example: "2d6+1d4+3"
+
+    ParsedComponent:
+      type: object
+      properties:
+        diceRolls:
+          type: array
+          items:
+            type: object
+            required:
+              - numberOfDice
+              - sidesPerDie
+              - modifier
+            properties:
+              numberOfDice:
+                type: integer
+                minimum: 1
+                example: 2
+              sidesPerDie:
+                type: integer
+                minimum: 1
+                example: 6
+              modifier:
+                type: integer
+                example: 0
+        globalModifier:
+          type: integer
+          description: Sum of all modifiers
+          example: 3
+        hasAdvantage:
+          type: boolean
+          example: false
+        hasDisadvantage:
+          type: boolean
+          example: false
+
+    ValidateResponse:
+      type: object
+      required:
+        - success
+        - data
+        - error
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - isValid
+            - originalExpression
+            - expectedMinimum
+            - expectedMaximum
+          properties:
+            isValid:
+              type: boolean
+              description: Whether expression is valid
+              example: true
+            originalExpression:
+              type: string
+              example: "2d6+1d4+3"
+            parsedComponents:
+              allOf:
+                - $ref: "#/components/schemas/ParsedComponent"
+              nullable: true
+              description: Parsed components (null if invalid)
+            expectedMinimum:
+              type: integer
+              nullable: true
+              description: Minimum possible roll (null if invalid)
+              example: 5
+            expectedMaximum:
+              type: integer
+              nullable: true
+              description: Maximum possible roll (null if invalid)
+              example: 19
+            message:
+              type: string
+              nullable: true
+              description: Error message if invalid
+              example: null
+        error:
+          type: null
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-01-27T10:30:00Z"
+
+    StatsResponse:
+      type: object
+      required:
+        - success
+        - data
+        - error
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - expression
+            - minimum
+            - maximum
+            - mean
+            - standardDeviation
+          properties:
+            expression:
+              type: string
+              example: "2d6+5"
+            minimum:
+              type: integer
+              description: Minimum possible roll
+              example: 7
+            maximum:
+              type: integer
+              description: Maximum possible roll
+              example: 17
+            mean:
+              type: number
+              format: double
+              description: Expected average value
+              example: 12.0
+            standardDeviation:
+              type: number
+              format: double
+              description: Standard deviation of possible outcomes
+              example: 2.415
+            mode:
+              type: integer
+              nullable: true
+              description: Most common outcome
+              example: 12
+            median:
+              type: integer
+              nullable: true
+              description: Median outcome
+              example: 12
+        error:
+          type: null
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-01-27T10:30:00Z"
