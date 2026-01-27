@@ -17,20 +17,22 @@
 
 **Fields**:
 
-| Field | Type | Constraints | Purpose |
-|-------|------|-----------|---------|
-| **Id** | Guid | PK, Not Null | Unique identifier for adventure; generated server-side |
-| **CurrentSceneId** | string | Not Null, Max 100 | Currently active scene identifier (e.g., "scene_forest_entrance") |
-| **GameState** | JSONB | Not Null | Flexible JSON object containing inventory, progress flags, variables, story state |
-| **CreatedAt** | DateTime | Not Null, UTC | Timestamp when adventure was initialized |
-| **LastUpdatedAt** | DateTime | Not Null, UTC | Timestamp of last state modification |
+| Field              | Type     | Constraints       | Purpose                                                                           |
+| ------------------ | -------- | ----------------- | --------------------------------------------------------------------------------- |
+| **Id**             | Guid     | PK, Not Null      | Unique identifier for adventure; generated server-side                            |
+| **CurrentSceneId** | string   | Not Null, Max 100 | Currently active scene identifier (e.g., "scene_forest_entrance")                 |
+| **GameState**      | JSONB    | Not Null          | Flexible JSON object containing inventory, progress flags, variables, story state |
+| **CreatedAt**      | DateTime | Not Null, UTC     | Timestamp when adventure was initialized                                          |
+| **LastUpdatedAt**  | DateTime | Not Null, UTC     | Timestamp of last state modification                                              |
 
 **Relationships**:
+
 - One-to-many implicit via GameState JSON (no foreign keys required)
 - Scene references are by ID string, not object references (denormalized)
 - User ID stored in context/claims, not in Adventure entity
 
 **Validation Rules**:
+
 - Id must be non-null and unique (enforced by database)
 - CurrentSceneId cannot be null or empty
 - CreatedAt cannot be modified after creation
@@ -38,12 +40,14 @@
 - LastUpdatedAt must be >= CreatedAt
 
 **State Transitions**:
+
 ```
 Created [CreatedAt] → Active [any timestamp] → Deleted [via API DELETE]
 Last Modified tracked in LastUpdatedAt on every update
 ```
 
 **Example Instance**:
+
 ```csharp
 {
   Id: Guid("550e8400-e29b-41d4-a716-446655440000"),
@@ -73,22 +77,24 @@ Last Modified tracked in LastUpdatedAt on every update
 **Purpose**: Encapsulates game state as an immutable structure. Stored as JSONB in database but typed in application layer.
 
 **Structure** (C# class):
+
 ```csharp
 public class GameState
 {
     public Dictionary<string, object> State { get; private set; }
-    
+
     public GameState(Dictionary<string, object> state = null)
     {
         State = state ?? new Dictionary<string, object>();
     }
-    
+
     public object GetValue(string key) => State?.ContainsKey(key) ?? false ? State[key] : null;
     public void SetValue(string key, object value) => State[key] = value;
 }
 ```
 
 **Common Fields** (conventions, not enforced):
+
 - `inventory` (List<string>) - player items
 - `health` (int) - hitpoints or health status
 - `gold` (int) - currency
@@ -99,6 +105,7 @@ public class GameState
 - `variables` (Dictionary<string, object>) - game-specific variables
 
 **Notes**:
+
 - No schema validation enforced at entity level
 - Game designers define valid fields per adventure type
 - Can evolve independently without database migrations
@@ -117,7 +124,7 @@ CREATE TABLE adventures (
     game_state JSONB NOT NULL DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Audit/indexing
     CONSTRAINT current_scene_id_not_empty CHECK (length(current_scene_id) > 0),
     CONSTRAINT game_state_not_null CHECK (game_state IS NOT NULL)
@@ -133,6 +140,7 @@ CREATE INDEX idx_adventures_game_state_gin ON adventures USING GIN(game_state);
 ```
 
 **Rationale for Design**:
+
 - UUID primary key for distributed/federation scenarios
 - JSONB chosen for flexibility and queryability
 - Temporal indexes support common sorting operations
@@ -144,6 +152,7 @@ CREATE INDEX idx_adventures_game_state_gin ON adventures USING GIN(game_state);
 ## Entity Lifecycle
 
 ### Adventure Creation (New)
+
 1. Client sends POST `/api/adventures` with optional initial GameState
 2. Service generates new Guid for Id
 3. Server sets CreatedAt to current UTC timestamp
@@ -162,12 +171,14 @@ CREATE INDEX idx_adventures_game_state_gin ON adventures USING GIN(game_state);
 7. Response includes full Adventure object with generated Id and timestamps
 
 ### Adventure Retrieval
+
 1. Client sends GET `/api/adventures/{id}`
 2. Service queries repository by Id
 3. If found: Return Adventure with all state
 4. If not found: Return 404 Not Found
 
 ### Adventure Update
+
 1. Client sends PUT `/api/adventures/{id}` with updated CurrentSceneId and/or GameState
 2. Service loads existing Adventure
 3. Service updates only provided fields (merge with existing GameState, not replace)
@@ -176,12 +187,14 @@ CREATE INDEX idx_adventures_game_state_gin ON adventures USING GIN(game_state);
 6. Response includes updated Adventure
 
 ### Adventure Deletion
+
 1. Client sends DELETE `/api/adventures/{id}`
 2. Service verifies Adventure exists (404 if not)
 3. Service deletes record from database (hard delete)
 4. Response: 204 No Content
 
 ### Adventure List
+
 1. Client sends GET `/api/adventures?page=1&limit=20`
 2. Service queries database with pagination
 3. Returns paginated result with count and hasMore flag
@@ -196,13 +209,15 @@ CREATE INDEX idx_adventures_game_state_gin ON adventures USING GIN(game_state);
 Current design uses no concurrency control (last-write-wins). For stronger consistency:
 
 1. Add `RowVersion` column to Adventure:
+
    ```sql
    ALTER TABLE adventures ADD COLUMN row_version BIGINT DEFAULT 0;
    ```
 
 2. On UPDATE, include row_version in WHERE clause:
+
    ```sql
-   UPDATE adventures 
+   UPDATE adventures
    SET game_state = $1, last_updated_at = NOW(), row_version = row_version + 1
    WHERE id = $2 AND row_version = $3
    ```
@@ -216,23 +231,25 @@ Current design uses no concurrency control (last-write-wins). For stronger consi
 
 ## Validation Rules (Entity Level)
 
-| Rule | Trigger | Consequence |
-|------|---------|-------------|
-| CurrentSceneId empty | Create or Update | 400 Bad Request |
-| GameState null | Create or Update | 400 Bad Request |
-| GameState exceeds 1MB | Create or Update | 413 Payload Too Large |
-| Id not Guid format | Any operation | 400 Bad Request |
-| CreatedAt modified | Update attempt | 400 Bad Request (read-only) |
+| Rule                  | Trigger          | Consequence                 |
+| --------------------- | ---------------- | --------------------------- |
+| CurrentSceneId empty  | Create or Update | 400 Bad Request             |
+| GameState null        | Create or Update | 400 Bad Request             |
+| GameState exceeds 1MB | Create or Update | 413 Payload Too Large       |
+| Id not Guid format    | Any operation    | 400 Bad Request             |
+| CreatedAt modified    | Update attempt   | 400 Bad Request (read-only) |
 
 ---
 
 ## Migration Strategy
 
-**Phase 1 (Current)**: 
+**Phase 1 (Current)**:
+
 - Create adventures table with schema above
 - No migrations needed if this is initial feature
 
 **Phase 2+ (Future)**:
+
 - If GameState schema becomes too rigid, consider extracting frequently-queried fields to top-level columns
 - If adventure count exceeds 10M, consider sharding by created_at ranges
 - If concurrent updates become issue, implement optimistic locking
