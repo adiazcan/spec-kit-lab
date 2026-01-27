@@ -1,0 +1,466 @@
+openapi: 3.0.1
+info:
+  title: Text Adventure Game - Adventure Management API
+  description: >
+    REST API for managing text adventure instances.
+    Users can create, retrieve, list, update, and delete adventures.
+    Each adventure tracks scene progression and game state.
+  version: 1.0.0
+  contact:
+    name: DiceEngine Team
+  license:
+    name: MIT
+
+servers:
+  - url: https://api.example.com
+    description: Production server
+  - url: http://localhost:5000
+    description: Local development server
+
+paths:
+  /api/adventures:
+    post:
+      tags:
+        - Adventures
+      summary: Create a new adventure
+      description: >
+        Initializes a new text adventure with default starting scene and empty game state.
+        Returns a unique adventure ID for subsequent operations.
+      operationId: createAdventure
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdventureRequest'
+            examples:
+              basic:
+                summary: Basic adventure creation
+                value:
+                  initialSceneId: 'scene_tavern_start'
+              withState:
+                summary: Adventure with initial game state
+                value:
+                  initialSceneId: 'scene_tavern_start'
+                  initialGameState:
+                    inventory:
+                      - 'dagger'
+                      - 'scroll'
+                    health: 100
+                    gold: 50
+      responses:
+        '201':
+          description: Adventure created successfully
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL of the newly created adventure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Adventure'
+              example:
+                id: '550e8400-e29b-41d4-a716-446655440000'
+                currentSceneId: 'scene_tavern_start'
+                gameState:
+                  inventory:
+                    - 'dagger'
+                  health: 100
+                  gold: 50
+                createdAt: '2026-01-27T10:30:00Z'
+                lastUpdatedAt: '2026-01-27T10:30:00Z'
+        '400':
+          description: Invalid request (missing required fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: 'InitialSceneId is required'
+                statusCode: 400
+        '413':
+          description: Game state payload too large (max 1MB)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - Adventures
+      summary: List all adventures with pagination
+      description: >
+        Retrieves a paginated list of all adventures.
+        Useful for showing user their adventure collection.
+        Supports offset-based pagination with configurable page size.
+      operationId: listAdventures
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number (1-indexed)
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+          description: Maximum adventures per page (max 100)
+      responses:
+        '200':
+          description: List of adventures retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedAdventureResponse'
+              example:
+                adventures:
+                  - id: '550e8400-e29b-41d4-a716-446655440000'
+                    currentSceneId: 'scene_tavern_start'
+                    gameState:
+                      inventory: []
+                      health: 100
+                    createdAt: '2026-01-27T10:30:00Z'
+                    lastUpdatedAt: '2026-01-27T10:30:00Z'
+                total: 42
+                page: 1
+                limit: 20
+                hasMore: true
+        '400':
+          description: Invalid pagination parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/adventures/{id}:
+    get:
+      tags:
+        - Adventures
+      summary: Retrieve a specific adventure
+      description: >
+        Returns the complete state of an adventure including current scene,
+        inventory, progress flags, and all metadata.
+      operationId: getAdventure
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Adventure unique identifier
+          example: '550e8400-e29b-41d4-a716-446655440000'
+      responses:
+        '200':
+          description: Adventure retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Adventure'
+        '404':
+          description: Adventure not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: 'Adventure not found'
+                statusCode: 404
+
+    put:
+      tags:
+        - Adventures
+      summary: Update adventure state
+      description: >
+        Updates the current scene and/or game state of an adventure.
+        Both fields are updated atomically. Game state merges with existing state.
+        Updates the lastUpdatedAt timestamp.
+      operationId: updateAdventure
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Adventure unique identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAdventureRequest'
+            examples:
+              sceneOnly:
+                summary: Update current scene only
+                value:
+                  currentSceneId: 'scene_forest_entrance'
+                  gameState: {}
+              fullState:
+                summary: Update scene and game state
+                value:
+                  currentSceneId: 'scene_forest_entrance'
+                  gameState:
+                    inventory:
+                      - 'dagger'
+                      - 'herb'
+                    health: 95
+                    visited_scenes:
+                      - 'scene_tavern_start'
+                      - 'scene_forest_entrance'
+      responses:
+        '200':
+          description: Adventure updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Adventure'
+        '400':
+          description: Invalid request (missing required fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Adventure not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '413':
+          description: Game state payload too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Adventures
+      summary: Delete an adventure
+      description: >
+        Permanently removes an adventure. This operation cannot be undone.
+        The adventure ID can then be reused for new adventures.
+      operationId: deleteAdventure
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Adventure unique identifier
+      responses:
+        '204':
+          description: Adventure deleted successfully
+        '404':
+          description: Adventure not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Adventure:
+      type: object
+      description: A single text adventure instance with current state
+      required:
+        - id
+        - currentSceneId
+        - gameState
+        - createdAt
+        - lastUpdatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique adventure identifier (server-generated, immutable)
+          example: '550e8400-e29b-41d4-a716-446655440000'
+        currentSceneId:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Currently active scene identifier (e.g., 'scene_tavern_start')
+          example: 'scene_tavern_start'
+        gameState:
+          type: object
+          description: >
+            Flexible JSON object containing game state.
+            Can include inventory (array), progress flags (object), variables, etc.
+            No fixed schema - designers define per-adventure conventions.
+          additionalProperties: true
+          example:
+            inventory:
+              - 'dagger'
+              - 'scroll'
+            health: 100
+            gold: 50
+            visited_scenes:
+              - 'scene_tavern_start'
+            quest_flags:
+              merchant_quest_accepted: true
+              dragon_defeated: false
+        createdAt:
+          type: string
+          format: date-time
+          description: When the adventure was initialized (ISO 8601, UTC)
+          example: '2026-01-27T10:30:00Z'
+        lastUpdatedAt:
+          type: string
+          format: date-time
+          description: When the adventure was last modified (ISO 8601, UTC)
+          example: '2026-01-27T10:35:00Z'
+
+    CreateAdventureRequest:
+      type: object
+      description: Request to create a new adventure
+      required:
+        - initialSceneId
+      properties:
+        initialSceneId:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Starting scene identifier
+          example: 'scene_tavern_start'
+          default: 'scene_start'
+        initialGameState:
+          type: object
+          nullable: true
+          description: >
+            Optional initial game state. If omitted, defaults to empty object.
+            Designers can provide starter inventory, flags, etc.
+          additionalProperties: true
+          example:
+            inventory: []
+            health: 100
+            gold: 0
+
+    UpdateAdventureRequest:
+      type: object
+      description: Request to update an adventure's scene and state
+      required:
+        - currentSceneId
+      properties:
+        currentSceneId:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: New active scene identifier
+          example: 'scene_forest_entrance'
+        gameState:
+          type: object
+          nullable: true
+          description: >
+            Updated game state. If omitted, state remains unchanged.
+            Replaces entire gameState object (use carefully with large objects).
+          additionalProperties: true
+          example:
+            inventory:
+              - 'dagger'
+              - 'herb'
+            health: 95
+            gold: 50
+
+    PagedAdventureResponse:
+      type: object
+      description: Paginated list of adventures
+      required:
+        - adventures
+        - total
+        - page
+        - limit
+        - hasMore
+      properties:
+        adventures:
+          type: array
+          description: Array of adventure objects for current page
+          items:
+            $ref: '#/components/schemas/Adventure'
+        total:
+          type: integer
+          description: Total number of adventures across all pages
+          example: 42
+        page:
+          type: integer
+          description: Current page number (1-indexed)
+          example: 1
+        limit:
+          type: integer
+          description: Adventures per page for this request
+          example: 20
+        hasMore:
+          type: boolean
+          description: Whether more pages exist after this one
+          example: true
+
+    ErrorResponse:
+      type: object
+      description: Standard error response
+      required:
+        - message
+        - statusCode
+      properties:
+        message:
+          type: string
+          description: Human-readable error description
+          example: 'Adventure not found'
+        statusCode:
+          type: integer
+          description: HTTP status code
+          example: 404
+        details:
+          type: object
+          description: Optional additional error details
+          nullable: true
+          additionalProperties: true
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    PayloadTooLarge:
+      description: Request body exceeds size limit
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+tags:
+  - name: Adventures
+    description: >
+      Adventure management endpoints for CRUD operations.
+      An adventure represents a user's active game instance with scene position
+      and game state (inventory, progress, etc.).
+
+x-additionalInfo:
+  compatibleWith:
+    - DiceEngine API v1.0.0
+  constraints:
+    maxGameStateSize: '1 MB'
+    maxSceneIdLength: 100
+    paginationMaxLimit: 100
+    httpTimeout: '200ms p95'
+  futureEnhancements:
+    - Concurrency control via RowVersion (optimistic locking)
+    - Advanced filtering on game state fields
+    - GraphQL endpoint alternative
+    - WebSocket for real-time adventure updates

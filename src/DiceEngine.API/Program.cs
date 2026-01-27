@@ -1,5 +1,6 @@
 using DiceEngine.Application.Services;
 using DiceEngine.Infrastructure.Persistence;
+using DiceEngine.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -33,6 +34,11 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<IDiceService, DiceService>();
 builder.Services.AddScoped<IDiceExpressionParser, DiceExpressionParser>();
 builder.Services.AddScoped<IDiceRoller, DiceRoller>();
+
+// Register Adventure services
+builder.Services.AddScoped<IAdventureService, AdventureService>();
+builder.Services.AddScoped<IAdventureRepository, AdventureRepository>();
+
 builder.Services.AddDbContext<DiceEngineDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
