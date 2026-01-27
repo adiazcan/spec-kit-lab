@@ -239,38 +239,38 @@ All core dice rolling features (basic, complex, advantage/disadvantage) fully fu
 
 ### Code Quality & Testing
 
-- [X] T107 [P] Run complete test suite: `dotnet test` (all user story tests must pass)
-- [X] T108 [P] Verify >90% code coverage for DiceService, DiceExpressionParser, DiceRoller in tests/
-- [X] T109 Run comprehensive edge case tests in tests/DiceEngine.Application.Tests/EdgeCaseTests.cs:
-  - [X] "0d6" rejection (zero dice)
-  - [X] "2d0" rejection (zero sides)
-  - [X] "100d100+50d50" max complexity handling
-  - [X] Whitespace variations: "2d6 + 1d4" equals "2d6+1d4"
-  - [X] Large modifiers: "1d20+1000", "1d20-1000"
+- [x] T107 [P] Run complete test suite: `dotnet test` (all user story tests must pass)
+- [x] T108 [P] Verify >90% code coverage for DiceService, DiceExpressionParser, DiceRoller in tests/
+- [x] T109 Run comprehensive edge case tests in tests/DiceEngine.Application.Tests/EdgeCaseTests.cs:
+  - [x] "0d6" rejection (zero dice)
+  - [x] "2d0" rejection (zero sides)
+  - [x] "100d100+50d50" max complexity handling
+  - [x] Whitespace variations: "2d6 + 1d4" equals "2d6+1d4"
+  - [x] Large modifiers: "1d20+1000", "1d20-1000"
 
 ### Documentation & API
 
-- [X] T110 Generate OpenAPI/Swagger documentation from code attributes in src/DiceEngine.API/
-- [X] T111 Cross-check generated OpenAPI against specs/001-dice-engine/contracts/openapi.yaml
-- [X] T112 Add XML doc comments to all public methods in DiceService, DiceRoller, DiceExpressionParser
-- [X] T113 Create README.md in repository root with feature overview and quickstart
-- [X] T114 Update specs/001-dice-engine/quickstart.md with actual build/run commands for completed implementation
+- [x] T110 Generate OpenAPI/Swagger documentation from code attributes in src/DiceEngine.API/
+- [x] T111 Cross-check generated OpenAPI against specs/001-dice-engine/contracts/openapi.yaml
+- [x] T112 Add XML doc comments to all public methods in DiceService, DiceRoller, DiceExpressionParser
+- [x] T113 Create README.md in repository root with feature overview and quickstart
+- [x] T114 Update specs/001-dice-engine/quickstart.md with actual build/run commands for completed implementation
 
 ### Performance & Security
 
-- [X] T115 [P] Verify cryptography: Confirm RandomNumberGenerator cannot be predicted (statistical test in tests/DiceEngine.Application.Tests/CryptographyTests.cs)
-- [X] T116 [P] Performance benchmark: Run 1000 rolls of varying complexity, verify all <50ms in tests/DiceEngine.Application.Tests/BenchmarkTests.cs
-- [X] T117 Input validation: Confirm all invalid expressions properly rejected with appropriate error codes
-- [X] T118 Test database connectivity: Spin up PostgreSQL, verify DbContext migrations work in tests/
+- [x] T115 [P] Verify cryptography: Confirm RandomNumberGenerator cannot be predicted (statistical test in tests/DiceEngine.Application.Tests/CryptographyTests.cs)
+- [x] T116 [P] Performance benchmark: Run 1000 rolls of varying complexity, verify all <50ms in tests/DiceEngine.Application.Tests/BenchmarkTests.cs
+- [x] T117 Input validation: Confirm all invalid expressions properly rejected with appropriate error codes
+- [x] T118 Test database connectivity: Spin up PostgreSQL, verify DbContext migrations work in tests/
 
 ### Integration & Deployment
 
-- [X] T119 Create docker-compose.yaml for local PostgreSQL setup in repository root
-- [X] T120 Create Dockerfile for containerizing DiceEngine.API in repository root
-- [X] T121 Test full API startup: `dotnet run --project src/DiceEngine.API`
-- [X] T122 Manual validation: Execute quickstart.md cURL examples end-to-end
-- [X] T123 Clean up: Run `dotnet format` on all source files for consistency
-- [X] T124 Final git cleanup: Commit all changes, verify clean working directory
+- [x] T119 Create docker-compose.yaml for local PostgreSQL setup in repository root
+- [x] T120 Create Dockerfile for containerizing DiceEngine.API in repository root
+- [x] T121 Test full API startup: `dotnet run --project src/DiceEngine.API`
+- [x] T122 Manual validation: Execute quickstart.md cURL examples end-to-end
+- [x] T123 Clean up: Run `dotnet format` on all source files for consistency
+- [x] T124 Final git cleanup: Commit all changes, verify clean working directory
 
 **Final Checkpoint: Ready for Production** ✅
 
