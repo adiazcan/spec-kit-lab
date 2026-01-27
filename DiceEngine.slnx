@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DiceEngine.API/DiceEngine.API.csproj" />
+    <Project Path="src/DiceEngine.Application/DiceEngine.Application.csproj" />
+    <Project Path="src/DiceEngine.Domain/DiceEngine.Domain.csproj" />
+    <Project Path="src/DiceEngine.Infrastructure/DiceEngine.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DiceEngine.API.Tests/DiceEngine.API.Tests.csproj" />
+    <Project Path="tests/DiceEngine.Application.Tests/DiceEngine.Application.Tests.csproj" />
+  </Folder>
+</Solution>

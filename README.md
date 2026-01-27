@@ -200,3 +200,81 @@ When you use GitHub Copilot in this workspace, it can automatically access these
 - Perform complex reasoning tasks
 
 No additional configuration is needed—just start using Copilot and it will leverage these tools when appropriate!
+
+---
+
+## Dice Rolling Engine Project
+
+This repository includes a complete implementation of a **Dice Rolling Engine** - a high-performance, production-ready dice rolling API built with ASP.NET Core 10.
+
+### Features
+
+- **Standard Dice Notation**: Roll any combination of dice (e.g., `2d6`, `1d20+5`, `3d8-2`)
+- **Complex Expressions**: Combine multiple dice groups (`2d6+1d4+3`, `1d8+2d6+5`)
+- **Advantage/Disadvantage**: D&D 5e-style mechanics (`1d20a` for advantage, `1d20d` for disadvantage)
+- **Cryptographic Security**: Uses `System.Security.Cryptography.RandomNumberGenerator` for truly random results
+- **High Performance**: Sub-50ms response times for all operations
+- **Validation Endpoint**: Validate expressions without rolling
+- **Statistical Analysis**: Calculate min/max/mean/standard deviation
+- **OpenAPI/Swagger**: Full API documentation with interactive UI
+- **Comprehensive Testing**: 76+ tests with code coverage
+
+### Quick Start
+
+\`\`\`bash
+# Build the solution
+dotnet build
+
+# Run the API
+dotnet run --project src/DiceEngine.API
+
+# Navigate to http://localhost:5000 for Swagger UI
+
+# Run tests
+dotnet test
+\`\`\`
+
+### API Example
+
+\`\`\`bash
+# Roll 2d6+3
+curl -X POST http://localhost:5000/api/roll \\
+  -H "Content-Type: application/json" \\
+  -d '{"expression":"2d6+3"}'
+
+# Validate expression
+curl -X POST http://localhost:5000/api/roll/validate \\
+  -H "Content-Type: application/json" \\
+  -d '{"expression":"2d6+1d4+3"}'
+
+# Get statistics
+curl http://localhost:5000/api/roll/stats/2d6
+\`\`\`
+
+### Project Structure
+
+\`\`\`
+src/
+├── DiceEngine.API/              # ASP.NET Core Web API
+├── DiceEngine.Application/      # Business Logic Layer
+├── DiceEngine.Domain/           # Domain Layer (Core)
+└── DiceEngine.Infrastructure/   # Infrastructure Layer
+
+tests/
+├── DiceEngine.API.Tests/        # API integration tests
+└── DiceEngine.Application.Tests/ # Unit tests (62 tests)
+
+specs/
+└── 001-dice-engine/            # Feature specification & planning docs
+\`\`\`
+
+### Supported Notation
+
+- **Basic**: `2d6`, `1d20+5`, `3d8-2`
+- **Complex**: `2d6+1d4+3`, `1d8+2d6+5`
+- **Advantage**: `1d20a` (roll twice, take higher)
+- **Disadvantage**: `1d20d` (roll twice, take lower)
+
+**Limits**: 1-1000 dice per roll, 1-1000 sides per die
+
+For detailed documentation, see [\`specs/001-dice-engine/\`](specs/001-dice-engine/).

@@ -405,6 +405,9 @@ FodyWeavers.xsd
 !.vscode/extensions.json
 !.vscode/*.code-snippets
 
+# Environment-specific configuration
+appsettings.Production.json
+
 # Local History for Visual Studio Code
 .history/
 
