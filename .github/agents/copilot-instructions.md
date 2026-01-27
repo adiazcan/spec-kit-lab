@@ -3,6 +3,8 @@
 Auto-generated from all feature plans. Last updated: 2026-01-27
 
 ## Active Technologies
+- C# with ASP.NET Core 10 + ASP.NET Core 10 Web API, Entity Framework Core, PostgreSQL, Swashbuckle (002-adventure-init)
+- PostgreSQL database with Entity Framework Core ORM (002-adventure-init)
 
 - C# with ASP.NET Core 10 + ASP.NET Core 10 Web API, Entity Framework Core, PostgreSQL (001-dice-engine)
 
@@ -22,6 +24,7 @@ tests/
 C# with ASP.NET Core 10: Follow standard conventions
 
 ## Recent Changes
+- 002-adventure-init: Added C# with ASP.NET Core 10 + ASP.NET Core 10 Web API, Entity Framework Core, PostgreSQL, Swashbuckle
 
 - 001-dice-engine: Added C# with ASP.NET Core 10 + ASP.NET Core 10 Web API, Entity Framework Core, PostgreSQL
 
