@@ -160,11 +160,11 @@ description: "Task list for Character Management System implementation"
 
 ### Implementation for User Story 5
 
-- [ ] T057 [US5] Add DeleteAsync method to ICharacterService interface
-- [ ] T058 [US5] Implement CharacterService.DeleteAsync with cascade delete in src/DiceEngine.Application/Services/CharacterService.cs
-- [ ] T059 [US5] Implement DELETE /api/adventures/{adventureId}/characters/{characterId} endpoint in src/DiceEngine.API/Controllers/CharactersController.cs
-- [ ] T060 [US5] Add error handling for character not found during delete (404)
-- [ ] T061 [US5] Verify cascade delete of snapshots configured in CharacterSnapshot entity mapping
+- [x] T057 [US5] Add DeleteAsync method to ICharacterService interface
+- [x] T058 [US5] Implement CharacterService.DeleteAsync with cascade delete in src/DiceEngine.Application/Services/CharacterService.cs
+- [x] T059 [US5] Implement DELETE /api/adventures/{adventureId}/characters/{characterId} endpoint in src/DiceEngine.API/Controllers/CharactersController.cs
+- [x] T060 [US5] Add error handling for character not found during delete (404)
+- [x] T061 [US5] Verify cascade delete of snapshots configured in CharacterSnapshot entity mapping
 
 **Checkpoint**: All user stories complete - full CRUD operations for characters with snapshots and deletion
 
@@ -174,15 +174,15 @@ description: "Task list for Character Management System implementation"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T062 [P] Add XML documentation comments to CharactersController endpoints
-- [ ] T063 [P] Add logging for character operations in CharacterService
-- [ ] T064 [P] Update Swagger/OpenAPI configuration to include character endpoints in src/DiceEngine.API/Program.cs
-- [ ] T065 Verify all endpoints return proper HTTP status codes per contracts/openapi.yaml
-- [ ] T066 [P] Add performance logging for database queries in CharacterRepository
-- [ ] T067 Run quickstart.md validation scenarios and verify all examples work
-- [ ] T068 [P] Add database indexes for performance (CharacterId in snapshots, AdventureId in characters)
-- [ ] T069 Code cleanup and refactoring for consistency with existing DiceEngine patterns
-- [ ] T070 [P] Update README.md with Character Management feature documentation
+- [x] T062 [P] Add XML documentation comments to CharactersController endpoints
+- [x] T063 [P] Add logging for character operations in CharacterService
+- [x] T064 [P] Update Swagger/OpenAPI configuration to include character endpoints in src/DiceEngine.API/Program.cs
+- [x] T065 Verify all endpoints return proper HTTP status codes per contracts/openapi.yaml
+- [x] T066 [P] Add performance logging for database queries in CharacterRepository
+- [x] T067 Run quickstart.md validation scenarios and verify all examples work
+- [x] T068 [P] Add database indexes for performance (CharacterId in snapshots, AdventureId in characters)
+- [x] T069 Code cleanup and refactoring for consistency with existing DiceEngine patterns
+- [x] T070 [P] Update README.md with Character Management feature documentation
 
 ---
 
