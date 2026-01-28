@@ -1,0 +1,685 @@
+openapi: 3.0.1
+info:
+  title: Character Management API
+  description: |
+    Character Management system for the Text Adventure Game.
+    Provides CRUD operations for game characters with attributes, automatic modifier calculation,
+    and snapshot/versioning for game saves.
+  version: '1.0.0'
+  contact:
+    name: Game API Support
+
+servers:
+  - url: http://localhost:5000/api
+    description: Development server
+  - url: /api
+    description: Relative path (production)
+
+tags:
+  - name: Characters
+    description: Character CRUD operations for a specific adventure
+  - name: Character Snapshots
+    description: Character snapshot and versioning operations
+
+paths:
+  /adventures/{adventureId}/characters:
+    post:
+      tags:
+        - Characters
+      summary: Create a new character
+      operationId: createCharacter
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The adventure ID to create character in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCharacterRequest'
+            examples:
+              standardCharacter:
+                summary: Standard character with balanced attributes
+                value:
+                  name: Gandalf the Grey
+                  strBase: 10
+                  dexBase: 12
+                  intBase: 18
+                  conBase: 14
+                  chaBase: 16
+              minimalAttributes:
+                summary: Character with minimum attributes
+                value:
+                  name: Peasant
+                  strBase: 3
+                  dexBase: 3
+                  intBase: 3
+                  conBase: 3
+                  chaBase: 3
+      responses:
+        '201':
+          description: Character successfully created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of the newly created character
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterResponse'
+        '400':
+          description: Invalid request (validation failure)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidAttributeValue:
+                  summary: Attribute outside valid range
+                  value:
+                    error: "STR must be between 3 and 18, received 25"
+                missingField:
+                  summary: Required field missing
+                  value:
+                    error: "Character name is required"
+        '404':
+          description: Adventure not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - Characters
+      summary: List all characters for an adventure
+      operationId: listCharacters
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The adventure ID to list characters for
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+          description: Number of characters per page
+      responses:
+        '200':
+          description: List of characters for the adventure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterListResponse'
+        '404':
+          description: Adventure not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /adventures/{adventureId}/characters/{characterId}:
+    get:
+      tags:
+        - Characters
+      summary: Retrieve a specific character
+      operationId: getCharacter
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Character details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterResponse'
+        '404':
+          description: Character or adventure not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Characters
+      summary: Update character attributes
+      operationId: updateCharacter
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCharacterRequest'
+            examples:
+              updateMultipleAttributes:
+                summary: Update multiple attributes
+                value:
+                  strBase: 14
+                  dexBase: 13
+                  intBase: 16
+                  version: 1
+              updateSingleAttribute:
+                summary: Update single attribute
+                value:
+                  strBase: 16
+                  version: 1
+      responses:
+        '200':
+          description: Character successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterResponse'
+        '400':
+          description: Invalid request or validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Character not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict - character has been modified (version mismatch)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Character has been modified by another user. Please refresh and retry."
+
+    delete:
+      tags:
+        - Characters
+      summary: Delete a character
+      operationId: deleteCharacter
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Character successfully deleted
+        '404':
+          description: Character not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /characters/{characterId}/snapshots:
+    post:
+      tags:
+        - Character Snapshots
+      summary: Create a character snapshot (save point)
+      operationId: createSnapshot
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSnapshotRequest'
+            examples:
+              withLabel:
+                summary: Snapshot with user-defined label
+                value:
+                  label: "Before Dragon Battle"
+              autoSnapshot:
+                summary: Snapshot with auto-generated label
+                value:
+                  label: null
+      responses:
+        '201':
+          description: Snapshot successfully created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of the newly created snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterSnapshotResponse'
+        '404':
+          description: Character not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - Character Snapshots
+      summary: List all snapshots for a character
+      operationId: listSnapshots
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number for pagination (most recent first)
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+          description: Number of snapshots per page
+      responses:
+        '200':
+          description: List of character snapshots in reverse chronological order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SnapshotListResponse'
+        '404':
+          description: Character not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /characters/{characterId}/snapshots/{snapshotId}:
+    get:
+      tags:
+        - Character Snapshots
+      summary: Retrieve a specific snapshot
+      operationId: getSnapshot
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: snapshotId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Snapshot details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterSnapshotResponse'
+        '404':
+          description: Snapshot or character not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CreateCharacterRequest:
+      type: object
+      required:
+        - name
+        - strBase
+        - dexBase
+        - intBase
+        - conBase
+        - chaBase
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Character name
+          example: "Frodo Baggins"
+        strBase:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Strength base value (3-18)
+          example: 10
+        dexBase:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Dexterity base value (3-18)
+          example: 12
+        intBase:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Intelligence base value (3-18)
+          example: 11
+        conBase:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Constitution base value (3-18)
+          example: 14
+        chaBase:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Charisma base value (3-18)
+          example: 13
+
+    UpdateCharacterRequest:
+      type: object
+      required:
+        - version
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Updated character name (optional)
+          example: "Frodo Baggins"
+        strBase:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Updated strength (optional)
+          example: 12
+        dexBase:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Updated dexterity (optional)
+        intBase:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Updated intelligence (optional)
+        conBase:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Updated constitution (optional)
+          example: 15
+        chaBase:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Updated charisma (optional)
+        version:
+          type: integer
+          minimum: 1
+          description: Current character version (for optimistic locking)
+          example: 1
+
+    CharacterResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique character identifier
+        name:
+          type: string
+          description: Character name
+        adventureId:
+          type: string
+          format: uuid
+          description: Adventure this character belongs to
+        attributes:
+          $ref: '#/components/schemas/CharacterAttributes'
+        version:
+          type: integer
+          description: Current version for optimistic locking
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp character was created (UTC, ISO 8601)
+        lastModifiedAt:
+          type: string
+          format: date-time
+          description: Timestamp character was last modified (UTC, ISO 8601)
+      example:
+        id: "550e8400-e29b-41d4-a716-446655440000"
+        name: "Gandalf"
+        adventureId: "660e8400-e29b-41d4-a716-446655440000"
+        attributes:
+          str:
+            base: 10
+            modifier: 0
+          dex:
+            base: 12
+            modifier: 1
+          int:
+            base: 18
+            modifier: 4
+          con:
+            base: 14
+            modifier: 2
+          cha:
+            base: 16
+            modifier: 3
+        version: 2
+        createdAt: "2026-01-28T10:00:00Z"
+        lastModifiedAt: "2026-01-28T11:30:00Z"
+
+    CharacterAttributes:
+      type: object
+      properties:
+        str:
+          $ref: '#/components/schemas/AttributeValue'
+        dex:
+          $ref: '#/components/schemas/AttributeValue'
+        int:
+          $ref: '#/components/schemas/AttributeValue'
+        con:
+          $ref: '#/components/schemas/AttributeValue'
+        cha:
+          $ref: '#/components/schemas/AttributeValue'
+
+    AttributeValue:
+      type: object
+      properties:
+        base:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Base attribute value
+        modifier:
+          type: integer
+          description: Calculated modifier ((base-10)/2 floored)
+      example:
+        base: 12
+        modifier: 1
+
+    CharacterListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CharacterResponse'
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 42
+          description: Total number of characters for the adventure
+
+    CreateSnapshotRequest:
+      type: object
+      properties:
+        label:
+          type: string
+          maxLength: 255
+          description: Optional snapshot label (e.g., "Before Dragon", "Level 5")
+          example: "Before Dragon Battle"
+          nullable: true
+
+    CharacterSnapshotResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique snapshot identifier
+        characterId:
+          type: string
+          format: uuid
+          description: Parent character ID
+        label:
+          type: string
+          description: Snapshot label (user-defined or auto-generated)
+          example: "Before Dragon Battle"
+        createdAt:
+          type: string
+          format: date-time
+          description: When snapshot was created (UTC, ISO 8601)
+        attributes:
+          $ref: '#/components/schemas/CharacterAttributes'
+          description: Captured attribute state at snapshot time
+      example:
+        id: "770e8400-e29b-41d4-a716-446655440000"
+        characterId: "550e8400-e29b-41d4-a716-446655440000"
+        label: "Before Dragon Battle"
+        createdAt: "2026-01-28T11:25:00Z"
+        attributes:
+          str:
+            base: 10
+            modifier: 0
+          dex:
+            base: 12
+            modifier: 1
+          int:
+            base: 18
+            modifier: 4
+          con:
+            base: 14
+            modifier: 2
+          cha:
+            base: 16
+            modifier: 3
+
+    SnapshotListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CharacterSnapshotResponse'
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 50
+        total:
+          type: integer
+          example: 12
+          description: Total number of snapshots for the character
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        statusCode:
+          type: integer
+          description: HTTP status code
+      example:
+        error: "Character not found"
+        statusCode: 404
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Conflict:
+      description: Conflict (e.g., version mismatch)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
