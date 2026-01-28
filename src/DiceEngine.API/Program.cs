@@ -39,6 +39,10 @@ builder.Services.AddScoped<IDiceRoller, DiceRoller>();
 builder.Services.AddScoped<IAdventureService, AdventureService>();
 builder.Services.AddScoped<IAdventureRepository, AdventureRepository>();
 
+// Register Character services
+builder.Services.AddScoped<ICharacterService, CharacterService>();
+builder.Services.AddScoped<ICharacterRepository, CharacterRepository>();
+
 builder.Services.AddDbContext<DiceEngineDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 

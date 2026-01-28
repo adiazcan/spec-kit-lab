@@ -1,0 +1,74 @@
+# .dockerignore for DiceEngine .NET project
+
+# Version control
+.git/
+.gitignore
+.github/
+
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+**/publish/
+build/
+dist/
+
+# Development files
+.vscode/
+.vs/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Tests and coverage
+**/tests/
+**/TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+# Documentation
+README.md
+THEGAME.md
+labs/
+specs/
+
+# Environment and secrets
+.env*
+*.env
+appsettings.Development.json
+appsettings.Production.json
+*.user
+*.suo
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# NuGet
+.nuget/
+*.nupkg
+*.snupkg
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Database
+*.db
+*.sqlite
+*.mdf
+*.ldf
+
+# Node modules (if any frontend)
+node_modules/
