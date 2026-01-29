@@ -5,7 +5,7 @@
 **Status**: Draft  
 **Input**: User description: "Build an inventory management system with stackable and unique items, equipment slots, loot tables, and item effects"
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Store and Retrieve Stackable Items (Priority: P1)
 
@@ -102,7 +102,7 @@ Items can have effects (healing potions restore health, torches provide light) a
 - What happens if an item modifier references a stat that doesn't exist on the character?
 - How does the system handle equipping cursed items or items with negative modifiers?
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -141,7 +141,7 @@ Items can have effects (healing potions restore health, torches provide light) a
 
 - **LootTable**: Defines a collection of possible items that can be generated. Contains weighted entries indicating rarity/frequency, supporting random selection. Associates items with generation probabilities.
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

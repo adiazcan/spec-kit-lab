@@ -36,6 +36,9 @@ public class CharacterService : ICharacterService
             request.ConBase, request.ChaBase
         );
 
+        // Initialize the 7 standard equipment slots for the character
+        character.InitializeEquipmentSlots();
+
         // Persist
         await _repository.AddCharacterAsync(character);
         await _repository.SaveAsync();

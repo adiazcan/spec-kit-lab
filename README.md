@@ -278,3 +278,71 @@ specs/
 **Limits**: 1-1000 dice per roll, 1-1000 sides per die
 
 For detailed documentation, see [\`specs/001-dice-engine/\`](specs/001-dice-engine/).
+---
+
+## Inventory System
+
+The Dice Rolling Engine also includes a comprehensive **Inventory Management System** for managing items, equipment, and loot generation in text-based adventure games.
+
+### Inventory Features
+
+- **Stackable Items**: Consumables (potions, scrolls) and resources (gold, arrows) that merge into stacks
+- **Unique Items**: Equipment with individual stats (weapons, armor, accessories)
+- **Equipment System**: 8 slot types (Head, Chest, Hands, Legs, Feet, MainHand, OffHand, Accessory)
+- **Stat Modifiers**: Items provide stat bonuses when equipped
+- **Loot Generation**: Weighted random loot tables for enemy drops and treasure chests
+- **100-item Capacity**: Per-adventure inventory limit with stack optimization
+
+### Inventory API Endpoints
+
+\`\`\`bash
+# Check inventory for an adventure
+curl http://localhost:5000/api/adventures/{id}/inventory
+
+# Add item to inventory
+curl -X POST http://localhost:5000/api/adventures/{id}/inventory \\
+  -H "Content-Type: application/json" \\
+  -d '{"itemId":"11111111-0001-0001-0001-000000000001","quantity":3}'
+
+# Equip an item
+curl -X PUT http://localhost:5000/api/characters/{id}/equipment/MainHand \\
+  -H "Content-Type: application/json" \\
+  -d '{"inventoryEntryId":"..."}'
+
+# Get character equipment (includes total stat modifiers)
+curl http://localhost:5000/api/characters/{id}/equipment
+
+# Generate loot from a loot table
+curl -X POST http://localhost:5000/api/loot-tables/{id}/generate \\
+  -H "Content-Type: application/json" \\
+  -d '{"adventureId":"...","count":3}'
+
+# List available items
+curl http://localhost:5000/api/items?itemType=Unique&rarity=Rare
+
+# Create a new item
+curl -X POST http://localhost:5000/api/items/stackable \\
+  -H "Content-Type: application/json" \\
+  -d '{"name":"Mana Potion","rarity":"Uncommon","maxStackSize":10}'
+\`\`\`
+
+### Sample Seed Data
+
+The system includes pre-seeded items and loot tables for testing:
+
+**Stackable Items:**
+- Healing Potion, Gold Coins, Arrows, Mana Elixir
+
+**Equipment:**
+- Iron Longsword (+2 Strength, +5 Attack)
+- Iron Breastplate (+3 Constitution, +8 Defense)
+- Wooden Shield (+3 Defense)
+- Leather Boots (+1 Dexterity, +2 Speed)
+- Amulet of Wisdom (+3 Intelligence, +5 MagicPower)
+
+**Loot Tables:**
+- **Goblin Loot**: 60% Gold, 30% Potion, 10% Dagger
+- **Treasure Chest**: High-value equipment and consumables
+- **Common Drops**: Basic adventuring finds
+
+For detailed documentation, see [`specs/004-inventory-system/`](specs/004-inventory-system/).

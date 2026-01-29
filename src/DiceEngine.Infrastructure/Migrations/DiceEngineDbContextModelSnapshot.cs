@@ -167,6 +167,177 @@ namespace DiceEngine.Infrastructure.Migrations
                     b.ToTable("character_snapshots", (string)null);
                 });
 
+            modelBuilder.Entity("DiceEngine.Domain.Entities.EquipmentSlot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("EquippedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("EquippedItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SlotType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("EquippedItemId");
+
+                    b.HasIndex("CharacterId", "SlotType")
+                        .IsUnique();
+
+                    b.ToTable("equipment_slots", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.InventoryEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("AdventureId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("SlotPosition")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdventureId");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("AdventureId", "ItemId");
+
+                    b.ToTable("inventory_entries", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.Item", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ItemType")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("character varying(13)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Rarity")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("items", (string)null);
+
+                    b.HasDiscriminator<string>("ItemType").HasValue("Item");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.LootTable", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("loot_tables", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.LootTableEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("LootTableId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Weight")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("LootTableId");
+
+                    b.ToTable("loot_table_entries", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.StackableItem", b =>
+                {
+                    b.HasBaseType("DiceEngine.Domain.Entities.Item");
+
+                    b.Property<int>("MaxStackSize")
+                        .HasColumnType("integer");
+
+                    b.HasDiscriminator().HasValue("Stackable");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.UniqueItem", b =>
+                {
+                    b.HasBaseType("DiceEngine.Domain.Entities.Item");
+
+                    b.Property<string>("Modifiers")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("SlotType")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasDiscriminator().HasValue("Unique");
+                });
+
             modelBuilder.Entity("DiceEngine.Domain.Entities.Character", b =>
                 {
                     b.HasOne("DiceEngine.Domain.Entities.Adventure", null)
@@ -187,9 +358,70 @@ namespace DiceEngine.Infrastructure.Migrations
                     b.Navigation("Character");
                 });
 
+            modelBuilder.Entity("DiceEngine.Domain.Entities.EquipmentSlot", b =>
+                {
+                    b.HasOne("DiceEngine.Domain.Entities.Character", "Character")
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DiceEngine.Domain.Entities.UniqueItem", "EquippedItem")
+                        .WithMany()
+                        .HasForeignKey("EquippedItemId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Character");
+
+                    b.Navigation("EquippedItem");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.InventoryEntry", b =>
+                {
+                    b.HasOne("DiceEngine.Domain.Entities.Adventure", "Adventure")
+                        .WithMany()
+                        .HasForeignKey("AdventureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DiceEngine.Domain.Entities.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Adventure");
+
+                    b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.LootTableEntry", b =>
+                {
+                    b.HasOne("DiceEngine.Domain.Entities.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DiceEngine.Domain.Entities.LootTable", "LootTable")
+                        .WithMany("Entries")
+                        .HasForeignKey("LootTableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("LootTable");
+                });
+
             modelBuilder.Entity("DiceEngine.Domain.Entities.Character", b =>
                 {
                     b.Navigation("Snapshots");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.LootTable", b =>
+                {
+                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

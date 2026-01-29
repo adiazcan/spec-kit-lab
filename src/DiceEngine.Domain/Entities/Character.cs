@@ -34,9 +34,36 @@ public class Character
 
     // Navigation
     public virtual ICollection<CharacterSnapshot> Snapshots { get; private set; } = new List<CharacterSnapshot>();
+    public virtual ICollection<EquipmentSlot> EquipmentSlots { get; private set; } = new List<EquipmentSlot>();
 
     // EF Core constructor
     private Character() { }
+
+    /// <summary>
+    /// Initializes the 7 standard equipment slots for this character.
+    /// Should be called once after character creation.
+    /// </summary>
+    public void InitializeEquipmentSlots()
+    {
+        if (EquipmentSlots.Count > 0)
+            return; // Already initialized
+
+        var slotTypes = new[]
+        {
+            SlotType.Head,
+            SlotType.Chest,
+            SlotType.Hands,
+            SlotType.Legs,
+            SlotType.Feet,
+            SlotType.MainHand,
+            SlotType.OffHand
+        };
+
+        foreach (var slotType in slotTypes)
+        {
+            EquipmentSlots.Add(EquipmentSlot.CreateEmpty(Id, slotType));
+        }
+    }
 
     /// <summary>
     /// Factory method for creating a new character with validation.
