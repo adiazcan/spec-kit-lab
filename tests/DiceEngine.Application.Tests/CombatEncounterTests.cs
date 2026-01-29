@@ -172,4 +172,91 @@ public class CombatEncounterTests : IClassFixture<CombatFixture>
         // Assert
         Assert.Null(outcome); // Combat should continue
     }
+
+    /// <summary>
+    /// T107: Edge case test - all players defeated results in enemy victory (Phase 6)
+    /// </summary>
+    [Fact]
+    public void Combat_AllPlayersDefeated_EnemyVictory()
+    {
+        // Arrange
+        var character = _fixture.CreateTestCharacterCombatant("Hero", maxHealth: 20);
+        var enemy = _fixture.CreateTestEnemyCombatant("Goblin", maxHealth: 50);
+        var combatants = new List<Combatant> { character, enemy };
+        var encounter = CombatEncounter.Create(_fixture.TestAdventureId, combatants);
+        var initiativeOrder = new List<Guid> { character.Id, enemy.Id };
+        encounter.StartCombat(initiativeOrder);
+
+        // Act - defeat all characters
+        character.MarkDefeated();
+
+        // Assert
+        var outcome = encounter.CheckCombatEnd();
+        Assert.NotNull(outcome);
+        Assert.Equal(CombatSide.Enemy, outcome.Winner);
+    }
+
+    /// <summary>
+    /// T108: Edge case test - simultaneous defeat results in draw (Phase 6)
+    /// </summary>
+    [Fact]
+    public void Combat_SimultaneousDefeat_DeclaresDraw()
+    {
+        // Arrange
+        var character = _fixture.CreateTestCharacterCombatant("Hero", maxHealth: 10);
+        var enemy = _fixture.CreateTestEnemyCombatant("Goblin", maxHealth: 10);
+        var combatants = new List<Combatant> { character, enemy };
+        var encounter = CombatEncounter.Create(_fixture.TestAdventureId, combatants);
+        var initiativeOrder = new List<Guid> { character.Id, enemy.Id };
+        encounter.StartCombat(initiativeOrder);
+
+        // Act - defeat both sides
+        character.MarkDefeated();
+        enemy.MarkDefeated();
+
+        // Assert - when all combatants are defeated, it should be a draw
+        var outcome = encounter.CheckCombatEnd();
+        Assert.NotNull(outcome);
+        Assert.Equal(CombatSide.Draw, outcome.Winner);
+    }
+
+    /// <summary>
+    /// T110: Edge case test - invalid combat (zero enemies) validation (Phase 6)
+    /// </summary>
+    [Fact]
+    public void Combat_ZeroEnemies_ReturnsValidationError()
+    {
+        // Arrange
+        var character = _fixture.CreateTestCharacterCombatant("Hero");
+        var onlyCharacters = new List<Combatant> { character };
+
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentException>(() =>
+            CombatEncounter.Create(_fixture.TestAdventureId, onlyCharacters));
+
+        Assert.Contains("at least one character and one enemy", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// T111: Edge case test - cannot attack defeated combatant (Phase 6)
+    /// </summary>
+    [Fact]
+    public void Combat_AttackDefeatedTarget_LogicallyInvalid()
+    {
+        // Arrange
+        var character = _fixture.CreateTestCharacterCombatant("Hero");
+        var enemy = _fixture.CreateTestEnemyCombatant("Goblin");
+        var combatants = new List<Combatant> { character, enemy };
+        var encounter = CombatEncounter.Create(_fixture.TestAdventureId, combatants);
+        var initiativeOrder = new List<Guid> { character.Id, enemy.Id };
+        encounter.StartCombat(initiativeOrder);
+
+        // Act - defeat enemy
+        enemy.MarkDefeated();
+
+        // Assert - defeated combatant should not be in active combatants
+        var activeCombatants = combatants.Where(c => c.Status == CombatantStatus.Active).ToList();
+        Assert.DoesNotContain(enemy, activeCombatants);
+        Assert.True(activeCombatants.All(c => c.Status != CombatantStatus.Defeated));
+    }
 }

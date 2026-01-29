@@ -1,7 +1,9 @@
 using DiceEngine.API.Controllers;
 using DiceEngine.API.Models;
+using DiceEngine.Application.Models;
 using DiceEngine.Application.Services;
 using DiceEngine.Domain.Entities;
+using DiceEngine.Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
@@ -30,21 +32,38 @@ public class CombatControllerTests
     }
 
     /// <summary>
-    /// Helper to create a test combat encounter
+    /// Helper to create a test combat encounter with valid initial data
     /// </summary>
     private CombatEncounter CreateTestCombatEncounter()
     {
-        var encounter = new CombatEncounter
-        {
-            Id = Guid.NewGuid(),
-            AdventureId = _testAdventureId,
-            Status = CombatStatus.NotStarted,
-            CurrentRound = 1,
-            CurrentTurnIndex = 0,
-            StartedAt = DateTime.UtcNow,
-            Version = 1
-        };
-        return encounter;
+        // Create player character combatant
+        var playerCombatant = Combatant.CreateFromCharacter(
+            _testAdventureId,
+            "TestCharacter",
+            _testCharacterId1,
+            dexModifier: 2,
+            armorClass: 16,
+            maxHealth: 30,
+            initiativeRoll: 15);
+
+        // Create an enemy and then convert to combatant
+        var enemy = Enemy.Create(
+            name: "TestEnemy",
+            strBase: 12,
+            dexBase: 13,
+            intBase: 10,
+            conBase: 14,
+            chaBase: 10,
+            maxHealth: 25,
+            armorClass: 14,
+            weaponInfo: "Shortsword|1d6+1");
+
+        var enemyCombatant = Combatant.CreateFromEnemy(enemy, initiativeRoll: 10);
+
+        var combatants = new List<Combatant> { playerCombatant, enemyCombatant };
+
+        // Create encounter using factory method (will be in NotStarted state)
+        return CombatEncounter.Create(_testAdventureId, combatants);
     }
 
     /// <summary>
@@ -62,13 +81,11 @@ public class CombatControllerTests
         };
 
         var encounter = CreateTestCombatEncounter();
-        encounter.Status = CombatStatus.Active;
-        encounter.InitiativeOrder.Add(Guid.NewGuid());
-        encounter.InitiativeOrder.Add(Guid.NewGuid());
+        encounter.StartCombat(new List<Guid> { _testCharacterId1, _testEnemyId1 });
 
         _combatServiceMock
             .Setup(s => s.StartCombatAsync(request.AdventureId, request.CharacterIds, request.EnemyIds))
-            .ReturnsAsync(new Result<CombatEncounter> { Value = encounter, IsSuccess = true });
+            .ReturnsAsync(Result<CombatEncounter>.Success(encounter));
 
         // Act
         var actionResult = await _controller.InitiateCombat(request);
@@ -78,7 +95,7 @@ public class CombatControllerTests
         Assert.Equal(nameof(CombatsController.GetCombat), createdResult.ActionName);
         Assert.NotNull(createdResult.Value);
         var response = Assert.IsType<CombatStateResponse>(createdResult.Value);
-        Assert.Equal(encounter.Id, response.CombatEncounterId);
+        Assert.Equal(encounter.Id, response.Id);
         Assert.Equal("Active", response.Status);
     }
 
@@ -122,7 +139,7 @@ public class CombatControllerTests
 
         _combatServiceMock
             .Setup(s => s.StartCombatAsync(It.IsAny<Guid>(), It.IsAny<List<Guid>>(), It.IsAny<List<Guid>>()))
-            .ReturnsAsync(new Result<CombatEncounter> { Error = "Character not found", IsSuccess = false });
+            .ReturnsAsync(Result<CombatEncounter>.Failure("Character not found"));
 
         // Act
         var actionResult = await _controller.InitiateCombat(request);
@@ -141,30 +158,21 @@ public class CombatControllerTests
     {
         // Arrange
         var encounter = CreateTestCombatEncounter();
-        encounter.Status = CombatStatus.Active;
-        var characterId = Guid.NewGuid();
-        var enemyId = Guid.NewGuid();
-        encounter.InitiativeOrder.Add(characterId);
-        encounter.InitiativeOrder.Add(enemyId);
-
+        encounter.StartCombat(new List<Guid> { encounter.Combatants.ElementAt(0).Id, encounter.Combatants.ElementAt(1).Id });
+        
         var request = new ResolveTurnRequest
         {
-            AttackingCombatantId = characterId,
-            TargetCombatantId = enemyId
+            AttackingCombatantId = encounter.Combatants.ElementAt(0).Id,
+            TargetCombatantId = encounter.Combatants.ElementAt(1).Id
         };
 
         var updatedEncounter = CreateTestCombatEncounter();
-        updatedEncounter.Status = CombatStatus.Active;
-        updatedEncounter.InitiativeOrder.Add(characterId);
-        updatedEncounter.InitiativeOrder.Add(enemyId);
+        updatedEncounter.StartCombat(new List<Guid> { updatedEncounter.Combatants.ElementAt(0).Id, updatedEncounter.Combatants.ElementAt(1).Id });
 
         _combatServiceMock
-            .Setup(s => s.ResolveAttackAsync(encounter.Id, characterId, enemyId))
-            .ReturnsAsync(new Result<(CombatEncounter encounter, AttackAction action)>
-            {
-                Value = (updatedEncounter, default!),
-                IsSuccess = true
-            });
+            .Setup(s => s.ResolveAttackAsync(encounter.Id, It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ReturnsAsync(Result<(AttackAction action, CombatEncounter encounter)>.Success(
+                (default!, updatedEncounter)));
 
         // Act
         var actionResult = await _controller.ResolveTurn(encounter.Id, request);
@@ -172,8 +180,8 @@ public class CombatControllerTests
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
         var response = Assert.IsType<CombatStateResponse>(okResult.Value);
-        Assert.Equal(encounter.Id, response.CombatEncounterId);
-        Assert.True(response.ActiveCombatants > 0);
+        Assert.Equal(updatedEncounter.Id, response.Id);
+        Assert.True(response.Combatants.Count > 0);
     }
 
     /// <summary>
@@ -192,11 +200,7 @@ public class CombatControllerTests
 
         _combatServiceMock
             .Setup(s => s.ResolveAttackAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>()))
-            .ReturnsAsync(new Result<(CombatEncounter, AttackAction)>
-            {
-                Error = "Not your turn",
-                IsSuccess = false
-            });
+            .ReturnsAsync(Result<(AttackAction action, CombatEncounter encounter)>.Failure("Not your turn"));
 
         // Act
         var actionResult = await _controller.ResolveTurn(encounter.Id, request);
@@ -215,27 +219,22 @@ public class CombatControllerTests
     {
         // Arrange
         var encounter = CreateTestCombatEncounter();
-        var characterId = Guid.NewGuid();
-        var enemyId = Guid.NewGuid();
+        encounter.StartCombat(new List<Guid> { _testCharacterId1, _testEnemyId1 });
 
         var request = new ResolveTurnRequest
         {
-            AttackingCombatantId = characterId,
-            TargetCombatantId = enemyId
+            AttackingCombatantId = _testCharacterId1,
+            TargetCombatantId = _testEnemyId1
         };
 
         var finalEncounter = CreateTestCombatEncounter();
-        finalEncounter.Status = CombatStatus.Completed;
-        finalEncounter.Winner = CombatSide.Player;
-        finalEncounter.EndedAt = DateTime.UtcNow;
+        finalEncounter.StartCombat(new List<Guid> { _testCharacterId1, _testEnemyId1 });
+        finalEncounter.EndCombat(CombatSide.Player);
 
         _combatServiceMock
-            .Setup(s => s.ResolveAttackAsync(encounter.Id, characterId, enemyId))
-            .ReturnsAsync(new Result<(CombatEncounter, AttackAction)>
-            {
-                Value = (finalEncounter, default!),
-                IsSuccess = true
-            });
+            .Setup(s => s.ResolveAttackAsync(encounter.Id, _testCharacterId1, _testEnemyId1))
+            .ReturnsAsync(Result<(AttackAction action, CombatEncounter encounter)>.Success(
+                (default!, finalEncounter)));
 
         // Act
         var actionResult = await _controller.ResolveTurn(encounter.Id, request);
@@ -255,31 +254,22 @@ public class CombatControllerTests
     {
         // Arrange
         var encounter = CreateTestCombatEncounter();
-        encounter.Status = CombatStatus.Active;
-        var characterId = Guid.NewGuid();
-        var enemyId = Guid.NewGuid();
-        encounter.InitiativeOrder.Add(characterId);
-        encounter.InitiativeOrder.Add(enemyId);
+        encounter.StartCombat(new List<Guid> { encounter.Combatants.ElementAt(0).Id, encounter.Combatants.ElementAt(1).Id });
 
         var request = new ResolveTurnRequest
         {
-            AttackingCombatantId = characterId,
-            TargetCombatantId = enemyId
+            AttackingCombatantId = encounter.Combatants.ElementAt(0).Id,
+            TargetCombatantId = encounter.Combatants.ElementAt(1).Id
         };
 
         // Return encounter where enemy took no damage (miss)
         var missEncounter = CreateTestCombatEncounter();
-        missEncounter.Status = CombatStatus.Active;
-        missEncounter.InitiativeOrder.Add(characterId);
-        missEncounter.InitiativeOrder.Add(enemyId);
+        missEncounter.StartCombat(new List<Guid> { missEncounter.Combatants.ElementAt(0).Id, missEncounter.Combatants.ElementAt(1).Id });
 
         _combatServiceMock
-            .Setup(s => s.ResolveAttackAsync(encounter.Id, characterId, enemyId))
-            .ReturnsAsync(new Result<(CombatEncounter, AttackAction)>
-            {
-                Value = (missEncounter, default!),
-                IsSuccess = true
-            });
+            .Setup(s => s.ResolveAttackAsync(encounter.Id, It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ReturnsAsync(Result<(AttackAction action, CombatEncounter encounter)>.Success(
+                (default!, missEncounter)));
 
         // Act
         var actionResult = await _controller.ResolveTurn(encounter.Id, request);
@@ -287,9 +277,9 @@ public class CombatControllerTests
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
         var response = Assert.IsType<CombatStateResponse>(okResult.Value);
-        Assert.Equal(encounter.Id, response.CombatEncounterId);
+        Assert.Equal(missEncounter.Id, response.Id);
         // Verify enemy health unchanged (no damage)
-        Assert.True(response.ActiveCombatants > 0);
+        Assert.True(response.Combatants.Count > 0);
     }
 
     /// <summary>
@@ -300,31 +290,22 @@ public class CombatControllerTests
     {
         // Arrange
         var encounter = CreateTestCombatEncounter();
-        encounter.Status = CombatStatus.Active;
-        var characterId = Guid.NewGuid();
-        var enemyId = Guid.NewGuid();
-        encounter.InitiativeOrder.Add(characterId);
-        encounter.InitiativeOrder.Add(enemyId);
+        encounter.StartCombat(new List<Guid> { encounter.Combatants.ElementAt(0).Id, encounter.Combatants.ElementAt(1).Id });
 
         var request = new ResolveTurnRequest
         {
-            AttackingCombatantId = characterId,
-            TargetCombatantId = enemyId
+            AttackingCombatantId = encounter.Combatants.ElementAt(0).Id,
+            TargetCombatantId = encounter.Combatants.ElementAt(1).Id
         };
 
         // Simulate successful attack with damage
         var hitEncounter = CreateTestCombatEncounter();
-        hitEncounter.Status = CombatStatus.Active;
-        hitEncounter.InitiativeOrder.Add(characterId);
-        hitEncounter.InitiativeOrder.Add(enemyId);
+        hitEncounter.StartCombat(new List<Guid> { hitEncounter.Combatants.ElementAt(0).Id, hitEncounter.Combatants.ElementAt(1).Id });
 
         _combatServiceMock
-            .Setup(s => s.ResolveAttackAsync(encounter.Id, characterId, enemyId))
-            .ReturnsAsync(new Result<(CombatEncounter, AttackAction)>
-            {
-                Value = (hitEncounter, default!),
-                IsSuccess = true
-            });
+            .Setup(s => s.ResolveAttackAsync(encounter.Id, It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ReturnsAsync(Result<(AttackAction action, CombatEncounter encounter)>.Success(
+                (default!, hitEncounter)));
 
         // Act
         var actionResult = await _controller.ResolveTurn(encounter.Id, request);
@@ -332,9 +313,9 @@ public class CombatControllerTests
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
         var response = Assert.IsType<CombatStateResponse>(okResult.Value);
-        Assert.Equal(encounter.Id, response.CombatEncounterId);
+        Assert.Equal(hitEncounter.Id, response.Id);
         // Combat is ongoing (still has active combatants)
-        Assert.True(response.ActiveCombatants > 0);
+        Assert.True(response.Combatants.Count > 0);
     }
 
     /// <summary>
@@ -348,7 +329,7 @@ public class CombatControllerTests
 
         _combatServiceMock
             .Setup(s => s.GetCombatStatusAsync(encounter.Id))
-            .ReturnsAsync(new Result<CombatEncounter> { Value = encounter, IsSuccess = true });
+            .ReturnsAsync(Result<CombatEncounter>.Success(encounter));
 
         // Act
         var actionResult = await _controller.GetCombat(encounter.Id);
@@ -356,7 +337,7 @@ public class CombatControllerTests
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
         var response = Assert.IsType<CombatStateResponse>(okResult.Value);
-        Assert.Equal(encounter.Id, response.CombatEncounterId);
+        Assert.Equal(encounter.Id, response.Id);
     }
 
     /// <summary>
@@ -370,7 +351,7 @@ public class CombatControllerTests
 
         _combatServiceMock
             .Setup(s => s.GetCombatStatusAsync(invalidId))
-            .ReturnsAsync(new Result<CombatEncounter> { Error = "Combat not found", IsSuccess = false });
+            .ReturnsAsync(Result<CombatEncounter>.Failure("Combat not found"));
 
         // Act
         var actionResult = await _controller.GetCombat(invalidId);

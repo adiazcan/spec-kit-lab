@@ -49,7 +49,8 @@ public class CombatFixture : IDisposable
         // Create Enemy entity first
         // Note: dexModifier is a computed value from dexBase using (dexBase - 10) / 2
         // So to get a specific modifier, we need: dexBase = 10 + (modifier * 2)
-        int dexBase = 10 + (dexModifier * 2);
+        // But dexBase must be in range 3-18 (D&D 5e standard)
+        int dexBase = Math.Min(18, Math.Max(3, 10 + (dexModifier * 2)));
 
         var enemy = Enemy.Create(
             name,
@@ -63,7 +64,16 @@ public class CombatFixture : IDisposable
             weaponInfo: "Rusty Sword|1d6+2",
             description: $"Test {name}");
 
-        return Combatant.CreateFromEnemy(enemy, initiativeRoll);
+        // Set the requested AI state via reflection (test-only approach)
+        if (aiState != AIState.Aggressive)
+        {
+            var propertyInfo = typeof(Enemy).GetProperty("CurrentAIState",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            propertyInfo?.GetSetMethod(true)?.Invoke(enemy, new object[] { aiState });
+        }
+
+        var combatant = Combatant.CreateFromEnemy(enemy, initiativeRoll);
+        return combatant;
     }
 
     /// <summary>

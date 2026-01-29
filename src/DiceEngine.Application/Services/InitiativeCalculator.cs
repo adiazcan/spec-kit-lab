@@ -17,35 +17,28 @@ public class InitiativeCalculator : IInitiativeCalculator
     }
 
     /// <summary>
-    /// Calculate initiative scores for all combatants and return sorted order
+    /// Determine turn order from combatants with pre-set initiative scores
     /// Rules:
-    /// 1. Roll d20 + DEX modifier for each combatant
-    /// 2. Sort by initiative score (high to low)
-    /// 3. Tie-break by DEX modifier (high to low)
-    /// 4. Still tied: random (use GUID hash)
+    /// 1. Sort by initiative score (high to low) - d20 + DEX modifier
+    /// 2. Tie-break by DEX modifier (high to low)
+    /// 3. Still tied: use GUID for deterministic ordering
+    /// 
+    /// This method assumes combatants already have their InitiativeRoll and InitiativeScore
+    /// set by CombatService.StartCombatAsync() which calls RollInitiative() separately for each
     /// </summary>
     public List<Guid> CalculateInitiativeOrder(IEnumerable<Combatant> combatants)
     {
         var combatantList = combatants.ToList();
-        
-        // Roll initiative for each combatant
+
+        // Create initiative entries from existing combatant initiative scores
         var initiatives = combatantList.Select(c => new InitiativeEntry(
             combatantId: c.Id,
-            roll: RollInitiative(),
+            roll: c.InitiativeRoll,
             dexMod: c.DexterityModifier,
             tiebreaker: c.TiebreakerKey
         )).ToList();
 
-        // Update the combatants with their rolls (for auditing)
-        for (int i = 0; i < combatantList.Count; i++)
-        {
-            var initiative = initiatives[i];
-            var combatant = combatantList.First(c => c.Id == initiative.CombatantId);
-            // Note: Combatants store InitiativeRoll and InitiativeScore but we can't modify them here
-            // This is handled in the CombatService when creating combatants
-        }
-
-        // Sort by initiative rules
+        // Sort by initiative rules: highest score first, then DEX modifier, then GUID tiebreaker
         var sorted = initiatives.OrderBy(i => i, new InitiativeComparer()).ToList();
 
         // Return ordered list of combatant IDs
