@@ -88,16 +88,16 @@ This task breakdown implements the Turn-Based Combat System with NPC/enemy AI st
 
 ### Unit Tests First (TDD)
 
-- [ ] T024 [P] [US1] Create CombatEncounterTests fixture in tests/DiceEngine.Application.Tests/Fixtures/CombatFixture.cs
-- [ ] T025 [P] [US1] Write test: CombatEncounter_Create_ValidInput_ReturnsSuccess in tests/DiceEngine.Application.Tests/CombatEncounterTests.cs
-- [ ] T026 [P] [US1] Write test: CombatEncounter_Create_EmptyCombatants_ReturnsFailure in tests/DiceEngine.Application.Tests/CombatEncounterTests.cs
-- [ ] T027 [P] [US1] Write test: Combatant_CreateFromCharacter_ValidInput_ReturnsSuccess in tests/DiceEngine.Application.Tests/CombatantTests.cs
-- [ ] T028 [P] [US1] Write test: Combatant_TakeDamage_ReducesHealth in tests/DiceEngine.Application.Tests/CombatantTests.cs
-- [ ] T029 [P] [US1] Write test: Combatant_TakeDamage_HealthReachesZero_MarksDefeated in tests/DiceEngine.Application.Tests/CombatantTests.cs
-- [ ] T030 [P] [US4] Write test: AttackResolver_AttackRoll_HitsWhenMeetsAC in tests/DiceEngine.Application.Tests/AttackResolverTests.cs
-- [ ] T031 [P] [US4] Write test: AttackResolver_AttackRoll_MissesWhenBelowAC in tests/DiceEngine.Application.Tests/AttackResolverTests.cs
-- [ ] T032 [P] [US4] Write test: AttackResolver_CriticalHit_Natural20_DoubleDamageDice in tests/DiceEngine.Application.Tests/AttackResolverTests.cs
-- [ ] T033 [P] [US4] Write test: DamageCalculator_CalculateDamage_UsesWeaponDice in tests/DiceEngine.Application.Tests/DamageCalculatorTests.cs
+- [X] T024 [P] [US1] Create CombatEncounterTests fixture in tests/DiceEngine.Application.Tests/Fixtures/CombatFixture.cs
+- [X] T025 [P] [US1] Write test: CombatEncounter_Create_ValidInput_ReturnsSuccess in tests/DiceEngine.Application.Tests/CombatEncounterTests.cs
+- [X] T026 [P] [US1] Write test: CombatEncounter_Create_EmptyCombatants_ReturnsFailure in tests/DiceEngine.Application.Tests/CombatEncounterTests.cs
+- [X] T027 [P] [US1] Write test: Combatant_CreateFromCharacter_ValidInput_ReturnsSuccess in tests/DiceEngine.Application.Tests/CombatantTests.cs
+- [X] T028 [P] [US1] Write test: Combatant_TakeDamage_ReducesHealth in tests/DiceEngine.Application.Tests/CombatantTests.cs
+- [X] T029 [P] [US1] Write test: Combatant_TakeDamage_HealthReachesZero_MarksDefeated in tests/DiceEngine.Application.Tests/CombatantTests.cs
+- [X] T030 [P] [US4] Write test: AttackResolver_AttackRoll_HitsWhenMeetsAC in tests/DiceEngine.Application.Tests/AttackResolverTests.cs
+- [X] T031 [P] [US4] Write test: AttackResolver_AttackRoll_MissesWhenBelowAC in tests/DiceEngine.Application.Tests/AttackResolverTests.cs
+- [X] T032 [P] [US4] Write test: AttackResolver_CriticalHit_Natural20_DoubleDamageDice in tests/DiceEngine.Application.Tests/AttackResolverTests.cs
+- [X] T033 [P] [US4] Write test: DamageCalculator_CalculateDamage_UsesWeaponDice in tests/DiceEngine.Application.Tests/DamageCalculatorTests.cs
 
 ### Service Layer Implementation
 
@@ -122,11 +122,11 @@ This task breakdown implements the Turn-Based Combat System with NPC/enemy AI st
 
 ### Integration Tests
 
-- [ ] T049 [US1] Write integration test: InitiateCombat_ValidRequest_Returns201 in tests/DiceEngine.API.Tests/CombatControllerTests.cs
-- [ ] T050 [US1] Write integration test: ResolveTurn_PlayerAttacksEnemy_DamagesEnemy in tests/DiceEngine.API.Tests/CombatControllerTests.cs
-- [ ] T051 [US1] Write integration test: Combat_EnemyDefeated_EndsWithPlayerVictory in tests/DiceEngine.API.Tests/CombatControllerTests.cs
-- [ ] T052 [US4] Write integration test: Attack_BelowAC_Misses_NoDamage in tests/DiceEngine.API.Tests/CombatControllerTests.cs
-- [ ] T053 [US4] Write integration test: Attack_MeetsOrExceedsAC_Hits_DealsDamage in tests/DiceEngine.API.Tests/CombatControllerTests.cs
+- [X] T049 [US1] Write integration test: InitiateCombat_ValidRequest_Returns201 in tests/DiceEngine.API.Tests/CombatControllerTests.cs
+- [X] T050 [US1] Write integration test: ResolveTurn_PlayerAttacksEnemy_DamagesEnemy in tests/DiceEngine.API.Tests/CombatControllerTests.cs
+- [X] T051 [US1] Write integration test: Combat_EnemyDefeated_EndsWithPlayerVictory in tests/DiceEngine.API.Tests/CombatControllerTests.cs
+- [X] T052 [US4] Write integration test: Attack_BelowAC_Misses_NoDamage in tests/DiceEngine.API.Tests/CombatControllerTests.cs
+- [X] T053 [US4] Write integration test: Attack_MeetsOrExceedsAC_Hits_DealsDamage in tests/DiceEngine.API.Tests/CombatControllerTests.cs
 
 ---
 
@@ -140,12 +140,12 @@ This task breakdown implements the Turn-Based Combat System with NPC/enemy AI st
 
 ### Unit Tests First (TDD)
 
-- [ ] T054 [P] [US2] Write test: InitiativeCalculator_CalculateForMultiple_SortsCorrectly in tests/DiceEngine.Application.Tests/InitiativeCalculatorTests.cs
-- [ ] T055 [P] [US2] Write test: InitiativeCalculator_TiedScores_ResolvesWithDexTiebreaker in tests/DiceEngine.Application.Tests/InitiativeCalculatorTests.cs
-- [ ] T056 [P] [US2] Write test: InitiativeCalculator_TiedDex_ResolvesRandomly in tests/DiceEngine.Application.Tests/InitiativeCalculatorTests.cs
-- [ ] T057 [P] [US2] Write test: CombatEncounter_AdvanceToNextTurn_MaintainsOrder in tests/DiceEngine.Application.Tests/CombatEncounterTests.cs
-- [ ] T058 [P] [US2] Write test: CombatEncounter_EndOfRound_StartsNewRound in tests/DiceEngine.Application.Tests/CombatEncounterTests.cs
-- [ ] T059 [P] [US2] Write test: CombatEncounter_DefeatedCombatant_SkippedInTurnOrder in tests/DiceEngine.Application.Tests/CombatEncounterTests.cs
+- [X] T054 [P] [US2] Write test: InitiativeCalculator_CalculateForMultiple_SortsCorrectly in tests/DiceEngine.Application.Tests/InitiativeCalculatorTests.cs
+- [X] T055 [P] [US2] Write test: InitiativeCalculator_TiedScores_ResolvesWithDexTiebreaker in tests/DiceEngine.Application.Tests/InitiativeCalculatorTests.cs
+- [X] T056 [P] [US2] Write test: InitiativeCalculator_TiedDex_ResolvesRandomly in tests/DiceEngine.Application.Tests/InitiativeCalculatorTests.cs
+- [X] T057 [P] [US2] Write test: CombatEncounter_AdvanceToNextTurn_MaintainsOrder in tests/DiceEngine.Application.Tests/CombatEncounterTests.cs
+- [X] T058 [P] [US2] Write test: CombatEncounter_EndOfRound_StartsNewRound in tests/DiceEngine.Application.Tests/CombatEncounterTests.cs
+- [X] T059 [P] [US2] Write test: CombatEncounter_DefeatedCombatant_SkippedInTurnOrder in tests/DiceEngine.Application.Tests/CombatEncounterTests.cs
 
 ### Implementation
 
