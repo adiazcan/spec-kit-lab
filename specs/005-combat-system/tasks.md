@@ -66,15 +66,15 @@ This task breakdown implements the Turn-Based Combat System with NPC/enemy AI st
 
 ### Repository Layer
 
-- [ ] T018 Create ICombatRepository interface in src/DiceEngine.Application/Services/ICombatRepository.cs
-- [ ] T019 [P] Create IEnemyRepository interface in src/DiceEngine.Application/Services/IEnemyRepository.cs
-- [ ] T020 Implement CombatRepository in src/DiceEngine.Infrastructure/Persistence/Repositories/CombatRepository.cs
-- [ ] T021 [P] Implement EnemyRepository in src/DiceEngine.Infrastructure/Persistence/Repositories/EnemyRepository.cs
+- [X] T018 Create ICombatRepository interface in src/DiceEngine.Application/Services/ICombatRepository.cs
+- [X] T019 [P] Create IEnemyRepository interface in src/DiceEngine.Application/Services/IEnemyRepository.cs
+- [X] T020 Implement CombatRepository in src/DiceEngine.Infrastructure/Persistence/Repositories/CombatRepository.cs
+- [X] T021 [P] Implement EnemyRepository in src/DiceEngine.Infrastructure/Persistence/Repositories/EnemyRepository.cs
 
 ### Application Models
 
-- [ ] T022 [P] Create Result<T> wrapper if not existing in src/DiceEngine.Application/Models/Result.cs
-- [ ] T023 [P] Create CombatException and related exceptions in src/DiceEngine.Application/Exceptions/CombatExceptions.cs
+- [X] T022 [P] Create Result<T> wrapper if not existing in src/DiceEngine.Application/Models/Result.cs
+- [X] T023 [P] Create CombatException and related exceptions in src/DiceEngine.Application/Exceptions/CombatExceptions.cs
 
 ---
 
@@ -101,24 +101,24 @@ This task breakdown implements the Turn-Based Combat System with NPC/enemy AI st
 
 ### Service Layer Implementation
 
-- [ ] T034 [US1] Implement InitiativeCalculator service in src/DiceEngine.Application/Services/InitiativeCalculator.cs
-- [ ] T035 [US4] Implement AttackResolver service in src/DiceEngine.Application/Services/AttackResolver.cs
-- [ ] T036 [US4] Implement DamageCalculator service in src/DiceEngine.Application/Services/DamageCalculator.cs
-- [ ] T037 [US1] Create ICombatService interface in src/DiceEngine.Application/Services/ICombatService.cs
-- [ ] T038 [US1] Implement CombatService.StartCombatAsync() method in src/DiceEngine.Application/Services/CombatService.cs
-- [ ] T039 [US1] Implement CombatService.ResolveAttackAsync() method in src/DiceEngine.Application/Services/CombatService.cs
-- [ ] T040 [US1] Implement CombatService.GetCombatStatusAsync() method in src/DiceEngine.Application/Services/CombatService.cs
-- [ ] T041 [US1] Implement CombatService.CheckCombatEnd() method in src/DiceEngine.Application/Services/CombatService.cs
+- [X] T034 [US1] Implement InitiativeCalculator service in src/DiceEngine.Application/Services/InitiativeCalculator.cs
+- [X] T035 [US4] Implement AttackResolver service in src/DiceEngine.Application/Services/AttackResolver.cs
+- [X] T036 [US4] Implement DamageCalculator service in src/DiceEngine.Application/Services/DamageCalculator.cs
+- [X] T037 [US1] Create ICombatService interface in src/DiceEngine.Application/Services/ICombatService.cs
+- [X] T038 [US1] Implement CombatService.StartCombatAsync() method in src/DiceEngine.Application/Services/CombatService.cs
+- [X] T039 [US1] Implement CombatService.ResolveAttackAsync() method in src/DiceEngine.Application/Services/CombatService.cs
+- [X] T040 [US1] Implement CombatService.GetCombatStatusAsync() method in src/DiceEngine.Application/Services/CombatService.cs
+- [X] T041 [US1] Implement CombatService.CheckCombatEnd() method in src/DiceEngine.Application/Services/CombatService.cs
 
 ### API Layer
 
-- [ ] T042 [P] [US1] Create InitiateCombatRequest DTO in src/DiceEngine.API/Models/InitiateCombatRequest.cs
-- [ ] T043 [P] [US1] Create CombatStateResponse DTO in src/DiceEngine.API/Models/CombatStateResponse.cs
-- [ ] T044 [P] [US1] Create ResolveTurnRequest DTO in src/DiceEngine.API/Models/ResolveTurnRequest.cs
-- [ ] T045 [P] [US1] Create AttackActionResponse DTO in src/DiceEngine.API/Models/AttackActionResponse.cs
-- [ ] T046 [US1] Create CombatController with POST /api/combats endpoint in src/DiceEngine.API/Controllers/CombatController.cs
-- [ ] T047 [US1] Implement GET /api/combats/{id} endpoint in src/DiceEngine.API/Controllers/CombatController.cs
-- [ ] T048 [US1] Implement POST /api/combats/{id}/turns endpoint in src/DiceEngine.API/Controllers/CombatController.cs
+- [X] T042 [P] [US1] Create InitiateCombatRequest DTO in src/DiceEngine.API/Models/InitiateCombatRequest.cs
+- [X] T043 [P] [US1] Create CombatStateResponse DTO in src/DiceEngine.API/Models/CombatStateResponse.cs
+- [X] T044 [P] [US1] Create ResolveTurnRequest DTO in src/DiceEngine.API/Models/ResolveTurnRequest.cs
+- [X] T045 [P] [US1] Create AttackActionResponse DTO in src/DiceEngine.API/Models/AttackActionResponse.cs
+- [X] T046 [US1] Create CombatController with POST /api/combats endpoint in src/DiceEngine.API/Controllers/CombatController.cs
+- [X] T047 [US1] Implement GET /api/combats/{id} endpoint in src/DiceEngine.API/Controllers/CombatController.cs
+- [X] T048 [US1] Implement POST /api/combats/{id}/turns endpoint in src/DiceEngine.API/Controllers/CombatController.cs
 
 ### Integration Tests
 
@@ -174,14 +174,14 @@ This task breakdown implements the Turn-Based Combat System with NPC/enemy AI st
 
 ### Enemy Entity & Repository
 
-- [ ] T069 [P] [US3] Create CreateEnemyRequest DTO in src/DiceEngine.API/Models/CreateEnemyRequest.cs
-- [ ] T070 [P] [US3] Create EnemyResponse DTO in src/DiceEngine.API/Models/EnemyResponse.cs
-- [ ] T071 [P] [US3] Create EnemyListResponse DTO in src/DiceEngine.API/Models/EnemyListResponse.cs
-- [ ] T072 Create EnemyController with POST /api/enemies endpoint in src/DiceEngine.API/Controllers/EnemyController.cs
-- [ ] T073 [P] Implement GET /api/enemies endpoint with pagination in src/DiceEngine.API/Controllers/EnemyController.cs
-- [ ] T074 [P] Implement GET /api/enemies/{id} endpoint in src/DiceEngine.API/Controllers/EnemyController.cs
-- [ ] T075 [P] Implement PUT /api/enemies/{id} endpoint in src/DiceEngine.API/Controllers/EnemyController.cs
-- [ ] T076 [P] Implement DELETE /api/enemies/{id} endpoint in src/DiceEngine.API/Controllers/EnemyController.cs
+- [X] T069 [P] [US3] Create CreateEnemyRequest DTO in src/DiceEngine.API/Models/CreateEnemyRequest.cs
+- [X] T070 [P] [US3] Create EnemyResponse DTO in src/DiceEngine.API/Models/EnemyResponse.cs
+- [X] T071 [P] [US3] Create EnemyListResponse DTO in src/DiceEngine.API/Models/EnemyListResponse.cs
+- [X] T072 Create EnemyController with POST /api/enemies endpoint in src/DiceEngine.API/Controllers/EnemyController.cs
+- [X] T073 [P] Implement GET /api/enemies endpoint with pagination in src/DiceEngine.API/Controllers/EnemyController.cs
+- [X] T074 [P] Implement GET /api/enemies/{id} endpoint in src/DiceEngine.API/Controllers/EnemyController.cs
+- [X] T075 [P] Implement PUT /api/enemies/{id} endpoint in src/DiceEngine.API/Controllers/EnemyController.cs
+- [X] T076 [P] Implement DELETE /api/enemies/{id} endpoint in src/DiceEngine.API/Controllers/EnemyController.cs
 
 ### Unit Tests First (TDD)
 
