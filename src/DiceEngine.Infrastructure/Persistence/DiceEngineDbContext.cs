@@ -29,6 +29,12 @@ public class DiceEngineDbContext : DbContext
     public DbSet<LootTable> LootTables { get; set; }
     public DbSet<LootTableEntry> LootTableEntries { get; set; }
 
+    // Combat System
+    public DbSet<CombatEncounter> CombatEncounters { get; set; }
+    public DbSet<Combatant> Combatants { get; set; }
+    public DbSet<Enemy> Enemies { get; set; }
+    public DbSet<AttackAction> AttackActions { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -282,6 +288,159 @@ public class DiceEngineDbContext : DbContext
             entity.HasIndex(e => e.LootTableId);
 
             entity.ToTable("loot_table_entries");
+        });
+
+        // ============== COMBAT SYSTEM ENTITIES ==============
+
+        // Configure Enemy entity
+        modelBuilder.Entity<Enemy>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.CurrentHealth).IsRequired();
+            entity.Property(e => e.MaxHealth).IsRequired();
+
+            entity.Property(e => e.StrBase).IsRequired();
+            entity.Property(e => e.DexBase).IsRequired();
+            entity.Property(e => e.IntBase).IsRequired();
+            entity.Property(e => e.ConBase).IsRequired();
+            entity.Property(e => e.ChaBase).IsRequired();
+
+            entity.Property(e => e.ArmorClass).IsRequired();
+
+            entity.Property(e => e.CurrentAIState)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            entity.Property(e => e.FleeHealthThreshold).IsRequired();
+            entity.Property(e => e.EquippedWeaponInfo).HasMaxLength(200);
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.LastModifiedAt).IsRequired();
+
+            entity.HasIndex(e => e.Name);
+            entity.HasIndex(e => e.CreatedAt).IsDescending();
+
+            entity.ToTable("enemies");
+        });
+
+        // Configure CombatEncounter entity
+        modelBuilder.Entity<CombatEncounter>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.AdventureId).IsRequired();
+            entity.HasOne<Adventure>()
+                .WithMany()
+                .HasForeignKey(e => e.AdventureId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(e => e.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            entity.Property(e => e.CurrentRound).IsRequired();
+            entity.Property(e => e.CurrentTurnIndex).IsRequired();
+
+            entity.Property(e => e.InitiativeOrder)
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<Guid>>(v, (JsonSerializerOptions?)null) ?? new());
+
+            entity.Property(e => e.Winner)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            entity.Property(e => e.StartedAt).IsRequired();
+            entity.Property(e => e.EndedAt);
+            entity.Property(e => e.Version).IsConcurrencyToken();
+
+            entity.HasMany(e => e.Combatants)
+                .WithOne()
+                .HasForeignKey(c => c.CombatEncounterId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(e => e.CompletedActions)
+                .WithOne()
+                .HasForeignKey(a => a.CombatEncounterId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.AdventureId);
+            entity.HasIndex(e => e.Status);
+
+            entity.ToTable("combat_encounters");
+        });
+
+        // Configure Combatant entity
+        modelBuilder.Entity<Combatant>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.CombatEncounterId).IsRequired();
+
+            entity.Property(e => e.CombatantType)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            entity.Property(e => e.CharacterId);
+            entity.Property(e => e.EnemyId);
+
+            entity.Property(e => e.DisplayName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.CurrentHealth).IsRequired();
+            entity.Property(e => e.MaxHealth).IsRequired();
+            entity.Property(e => e.ArmorClass).IsRequired();
+
+            entity.Property(e => e.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            entity.Property(e => e.DexterityModifier).IsRequired();
+            entity.Property(e => e.InitiativeRoll).IsRequired();
+            entity.Property(e => e.InitiativeScore).IsRequired();
+
+            entity.Property(e => e.AIState)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            entity.Property(e => e.TiebreakerKey).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+
+            entity.HasIndex(e => e.CombatEncounterId);
+            entity.HasIndex(e => new { e.CombatEncounterId, e.Status });
+            entity.HasIndex(e => new { e.CombatEncounterId, e.InitiativeScore }).IsDescending(false, true);
+
+            entity.ToTable("combatants");
+        });
+
+        // Configure AttackAction entity
+        modelBuilder.Entity<AttackAction>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.CombatEncounterId).IsRequired();
+
+            entity.Property(e => e.AttackerId).IsRequired();
+            entity.Property(e => e.TargetId).IsRequired();
+            entity.Property(e => e.AttackRoll).IsRequired();
+            entity.Property(e => e.AttackModifier).IsRequired();
+            entity.Property(e => e.AttackTotal).IsRequired();
+            entity.Property(e => e.TargetAC).IsRequired();
+            entity.Property(e => e.IsHit).IsRequired();
+            entity.Property(e => e.IsCriticalHit).IsRequired();
+            entity.Property(e => e.WeaponName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.DamageExpression).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.DamageRoll).IsRequired();
+            entity.Property(e => e.DamageModifier).IsRequired();
+            entity.Property(e => e.TotalDamage).IsRequired();
+            entity.Property(e => e.TargetHealthAfter).IsRequired();
+            entity.Property(e => e.Timestamp).IsRequired();
+
+            entity.HasIndex(e => e.CombatEncounterId);
+            entity.HasIndex(e => new { e.CombatEncounterId, e.Timestamp });
+
+            entity.ToTable("attack_actions");
         });
     }
 }

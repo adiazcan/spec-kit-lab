@@ -1,0 +1,1012 @@
+openapi: 3.0.1
+info:
+  title: Turn-Based Combat System API
+  version: 1.0.0
+  description: RESTful API for turn-based combat encounters with NPC/enemy AI state machines
+  contact:
+    name: DiceEngine Combat Team
+
+servers:
+  - url: /api
+    description: API server
+
+tags:
+  - name: Combat
+    description: Combat encounter management and turn resolution
+  - name: Enemies
+    description: NPC/Enemy entity management
+
+paths:
+  # ==================== COMBAT ENCOUNTER ENDPOINTS ====================
+
+  /combats:
+    post:
+      operationId: InitiateCombat
+      tags:
+        - Combat
+      summary: Initiate a new combat encounter
+      description: |
+        Create and start a new combat encounter with the specified combatants (player characters and enemies).
+
+        Automatically calculates initiative for all combatants and establishes turn order.
+
+        **Requirements:**
+        - At least one player character
+        - At least one enemy
+        - All combatants must have health > 0
+        - All referenced characters and enemies must exist
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InitiateCombatRequest"
+            example:
+              adventure_id: "550e8400-e29b-41d4-a716-446655440001"
+              player_character_ids:
+                - "550e8400-e29b-41d4-a716-446655440002"
+                - "550e8400-e29b-41d4-a716-446655440003"
+              enemy_ids:
+                - "550e8400-e29b-41d4-a716-446655440004"
+
+      responses:
+        201:
+          description: Combat encounter created and started successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CombatEncounterResponse"
+
+        400:
+          description: Invalid request (missing required fields, invalid IDs)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingCharacters:
+                  value:
+                    error: "BadRequest"
+                    message: "At least one player character is required"
+                missingEnemies:
+                  value:
+                    error: "BadRequest"
+                    message: "At least one enemy is required"
+
+        404:
+          description: Referenced character or enemy not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        422:
+          description: Combat validation failed (character/enemy stats invalid)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /combats/{combat_id}:
+    get:
+      operationId: GetCombatStatus
+      tags:
+        - Combat
+      summary: Get current combat encounter status
+      description: |
+        Retrieve the current state of an active or completed combat encounter.
+
+        Includes combatant status, initiative order, current turn information, and action history.
+
+      parameters:
+        - $ref: "#/components/parameters/CombatId"
+
+      responses:
+        200:
+          description: Combat encounter status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CombatEncounterResponse"
+
+        404:
+          description: Combat encounter not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /combats/{combat_id}/turns:
+    post:
+      operationId: ResolveCombatantAction
+      tags:
+        - Combat
+      summary: Execute current combatant's action
+      description: |
+        Execute an action for the combatant whose turn it is.
+
+        Supports attack actions (vs specific target) and tactical actions (defend, flee).
+
+        **Validation:**
+        - Must be combatant's turn (not another's)
+        - Target must be valid and alive (for attacks)
+        - Combatant must be active (not defeated/fled)
+        - Combat must be active (not completed)
+
+      parameters:
+        - $ref: "#/components/parameters/CombatId"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CombatActionRequest"
+            examples:
+              attackAction:
+                summary: Attack target
+                value:
+                  action_type: "attack"
+                  target_combatant_id: "550e8400-e29b-41d4-a716-446655440005"
+              defendAction:
+                summary: Take defensive stance
+                value:
+                  action_type: "defend"
+              fleeAction:
+                summary: Attempt to flee combat
+                value:
+                  action_type: "flee"
+
+      responses:
+        200:
+          description: Action resolved and turn advanced
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CombatTurnResponse"
+
+        400:
+          description: Invalid action request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidTarget:
+                  value:
+                    error: "BadRequest"
+                    message: "Target combatant not found in this encounter"
+                targetDefeated:
+                  value:
+                    error: "BadRequest"
+                    message: "Cannot attack defeated target"
+
+        409:
+          description: Not this combatant's turn or combat state conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                notYourTurn:
+                  value:
+                    error: "Conflict"
+                    message: "Not this combatant's turn"
+                combatCompleted:
+                  value:
+                    error: "Conflict"
+                    message: "Combat encounter has ended"
+
+        404:
+          description: Combat encounter or combatant not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /combats/{combat_id}/actions:
+    get:
+      operationId: GetCombatActions
+      tags:
+        - Combat
+      summary: Get combat action history
+      description: |
+        Retrieve all completed actions (attacks, ability uses) from a combat encounter.
+
+        Includes detailed information about each action: attack rolls, damage, hits/misses.
+
+        **Pagination:**
+        - Default limit: 50 actions
+        - Max limit: 500 actions
+        - Sorted by timestamp (ascending)
+
+      parameters:
+        - $ref: "#/components/parameters/CombatId"
+        - $ref: "#/components/parameters/Skip"
+        - $ref: "#/components/parameters/Limit"
+
+      responses:
+        200:
+          description: Combat action history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CombatActionsResponse"
+
+        404:
+          description: Combat encounter not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ==================== ENEMY/NPC ENDPOINTS ====================
+
+  /enemies:
+    post:
+      operationId: CreateEnemy
+      tags:
+        - Enemies
+      summary: Create a new NPC/enemy template
+      description: |
+        Create a reusable enemy template with stats, AI behavior, and equipment.
+
+        Enemies created here can be used in multiple combat encounters.
+
+        **Health Defaults:**
+        - If not provided, calculated from CON: 10 + (CON modifier × 2)
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEnemyRequest"
+            example:
+              name: "Goblin Warrior"
+              description: "A scrappy green goblin with a rusty scimitar"
+              str_base: 10
+              dex_base: 14
+              int_base: 8
+              con_base: 12
+              cha_base: 9
+              max_health: 15
+              armor_class: 15
+              weapon_info: "1d6+2 slashing (scimitar)"
+              flee_health_threshold: 0.25
+
+      responses:
+        201:
+          description: Enemy created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnemyResponse"
+
+        400:
+          description: Validation failed (invalid attributes or stats)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidStats:
+                  value:
+                    error: "BadRequest"
+                    message: "All attributes must be in range 3-18"
+                invalidHealth:
+                  value:
+                    error: "BadRequest"
+                    message: "Max health must be positive"
+
+    get:
+      operationId: ListEnemies
+      tags:
+        - Enemies
+      summary: List all enemy templates
+      description: |
+        Retrieve all created enemy templates.
+
+        **Pagination:**
+        - Default limit: 20 enemies
+        - Max limit: 100 enemies
+        - Sorted by creation date (newest first)
+
+      parameters:
+        - $ref: "#/components/parameters/Skip"
+        - $ref: "#/components/parameters/Limit"
+
+      responses:
+        200:
+          description: List of enemy templates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnemyListResponse"
+
+  /enemies/{enemy_id}:
+    get:
+      operationId: GetEnemy
+      tags:
+        - Enemies
+      summary: Get enemy details
+      description: Retrieve full details and stats for a specific enemy template
+
+      parameters:
+        - $ref: "#/components/parameters/EnemyId"
+
+      responses:
+        200:
+          description: Enemy template details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnemyResponse"
+
+        404:
+          description: Enemy not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      operationId: UpdateEnemy
+      tags:
+        - Enemies
+      summary: Update enemy template
+      description: |
+        Update an enemy template's stats and behavior.
+
+        Cannot update enemies currently in active combat.
+
+      parameters:
+        - $ref: "#/components/parameters/EnemyId"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEnemyRequest"
+
+      responses:
+        200:
+          description: Enemy updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnemyResponse"
+
+        400:
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        404:
+          description: Enemy not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        409:
+          description: Enemy is currently in active combat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      operationId: DeleteEnemy
+      tags:
+        - Enemies
+      summary: Delete enemy template
+      description: |
+        Delete an enemy template.
+
+        Cannot delete enemies currently in active combat.
+
+      parameters:
+        - $ref: "#/components/parameters/EnemyId"
+
+      responses:
+        204:
+          description: Enemy deleted successfully
+
+        404:
+          description: Enemy not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        409:
+          description: Enemy is currently in active combat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+# ==================== COMPONENTS ====================
+
+components:
+  parameters:
+    CombatId:
+      name: combat_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Unique identifier of the combat encounter
+
+    EnemyId:
+      name: enemy_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Unique identifier of the enemy template
+
+    Skip:
+      name: skip
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      description: Number of records to skip for pagination
+
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+      description: Maximum number of records to return
+
+  schemas:
+    # ==================== REQUESTS ====================
+
+    InitiateCombatRequest:
+      type: object
+      required:
+        - adventure_id
+        - player_character_ids
+        - enemy_ids
+      properties:
+        adventure_id:
+          type: string
+          format: uuid
+          description: Parent adventure for this combat
+        player_character_ids:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            format: uuid
+          description: IDs of player characters participating
+        enemy_ids:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            format: uuid
+          description: IDs of enemies/NPCs participating
+
+    CombatActionRequest:
+      type: object
+      required:
+        - action_type
+      properties:
+        action_type:
+          type: string
+          enum:
+            - attack
+            - defend
+            - flee
+          description: Type of action to perform
+        target_combatant_id:
+          type: string
+          format: uuid
+          description: Target combatant ID (required for attack actions)
+
+    CreateEnemyRequest:
+      type: object
+      required:
+        - name
+        - str_base
+        - dex_base
+        - int_base
+        - con_base
+        - cha_base
+        - max_health
+        - armor_class
+        - weapon_info
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Enemy name or title
+        description:
+          type: string
+          maxLength: 500
+          description: Flavor text describing the enemy
+        str_base:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Strength base attribute
+        dex_base:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Dexterity base attribute
+        int_base:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Intelligence base attribute
+        con_base:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Constitution base attribute
+        cha_base:
+          type: integer
+          minimum: 3
+          maximum: 18
+          description: Charisma base attribute
+        max_health:
+          type: integer
+          minimum: 1
+          description: Maximum health pool
+        armor_class:
+          type: integer
+          minimum: 10
+          description: Armor class (defense value)
+        weapon_info:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: "Weapon name and damage dice (e.g., '1d6+2 slashing')"
+        flee_health_threshold:
+          type: number
+          minimum: 0.0
+          maximum: 1.0
+          default: 0.25
+          description: Health percentage (0-1) when enemy switches to flee behavior
+
+    UpdateEnemyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        armor_class:
+          type: integer
+          minimum: 10
+        weapon_info:
+          type: string
+          minLength: 1
+          maxLength: 200
+        flee_health_threshold:
+          type: number
+          minimum: 0.0
+          maximum: 1.0
+
+    # ==================== RESPONSES ====================
+
+    CombatEncounterResponse:
+      type: object
+      required:
+        - id
+        - adventure_id
+        - status
+        - current_round
+        - current_turn_index
+        - initiative_order
+        - combatants
+        - winner
+        - started_at
+        - ended_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique combat encounter ID
+        adventure_id:
+          type: string
+          format: uuid
+          description: Parent adventure
+        status:
+          type: string
+          enum:
+            - NotStarted
+            - Active
+            - Completed
+          description: Current combat status
+        current_round:
+          type: integer
+          minimum: 1
+          description: Current round number
+        current_turn_index:
+          type: integer
+          minimum: 0
+          description: Current combatant's index in initiative order
+        initiative_order:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Sorted combatant IDs (initiative order)
+        combatants:
+          type: array
+          items:
+            $ref: "#/components/schemas/CombatantResponse"
+          description: All combatants in encounter
+        completed_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttackActionResponse"
+          description: History of resolved actions
+        winner:
+          type: string
+          enum:
+            - Player
+            - Enemy
+            - Draw
+            - null
+          nullable: true
+          description: Battle outcome (null if ongoing)
+        started_at:
+          type: string
+          format: date-time
+          description: Combat start time (UTC)
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Combat end time (UTC), null if ongoing
+
+    CombatantResponse:
+      type: object
+      required:
+        - id
+        - combatant_type
+        - display_name
+        - current_health
+        - max_health
+        - armor_class
+        - status
+        - initiative_roll
+        - initiative_score
+        - dexterity_modifier
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Combatant ID
+        combatant_type:
+          type: string
+          enum:
+            - Character
+            - Enemy
+          description: Type of combatant
+        character_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Character ID (if player combatant)
+        enemy_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Enemy ID (if NPC combatant)
+        display_name:
+          type: string
+          description: Display name for UI
+        current_health:
+          type: integer
+          minimum: 0
+          description: Current health
+        max_health:
+          type: integer
+          minimum: 1
+          description: Maximum health
+        armor_class:
+          type: integer
+          minimum: 10
+          description: Armor class
+        status:
+          type: string
+          enum:
+            - Active
+            - Defeated
+            - Fled
+          description: Combat status
+        initiative_roll:
+          type: integer
+          minimum: 1
+          maximum: 20
+          description: Raw d20 roll result
+        initiative_score:
+          type: integer
+          description: d20 + DEX modifier
+        dexterity_modifier:
+          type: integer
+          minimum: -5
+          maximum: 5
+          description: DEX modifier used for initiative
+        ai_state:
+          type: string
+          enum:
+            - Aggressive
+            - Defensive
+            - Flee
+            - null
+          nullable: true
+          description: AI behavior state (enemies only)
+
+    AttackActionResponse:
+      type: object
+      required:
+        - id
+        - attacker_id
+        - target_id
+        - attack_roll
+        - attack_modifier
+        - attack_total
+        - target_ac
+        - is_hit
+        - is_critical_hit
+        - weapon_name
+        - damage_expression
+        - damage_roll
+        - damage_modifier
+        - total_damage
+        - target_health_after
+        - timestamp
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Action ID
+        attacker_id:
+          type: string
+          format: uuid
+          description: Attacking combatant
+        target_id:
+          type: string
+          format: uuid
+          description: Target combatant
+        attack_roll:
+          type: integer
+          minimum: 1
+          maximum: 20
+          description: Raw d20 result
+        attack_modifier:
+          type: integer
+          description: Attack bonus (STR/DEX + proficiency)
+        attack_total:
+          type: integer
+          description: attack_roll + attack_modifier
+        target_ac:
+          type: integer
+          minimum: 10
+          description: Target's armor class
+        is_hit:
+          type: boolean
+          description: attack_total >= target_ac
+        is_critical_hit:
+          type: boolean
+          description: attack_roll == 20 (critical hit)
+        weapon_name:
+          type: string
+          description: Weapon used for attack
+        damage_expression:
+          type: string
+          description: "Dice expression (e.g., '1d8+3')"
+        damage_roll:
+          type: integer
+          minimum: 0
+          description: Raw damage dice result
+        damage_modifier:
+          type: integer
+          description: Damage bonus (STR modifier, magic, etc)
+        total_damage:
+          type: integer
+          minimum: 0
+          description: "Damage dealt (0 if miss), or doubled dice if critical"
+        target_health_after:
+          type: integer
+          minimum: 0
+          description: Target's health remaining post-damage
+        timestamp:
+          type: string
+          format: date-time
+          description: When action occurred (UTC)
+
+    CombatTurnResponse:
+      type: object
+      description: Result of action resolution and turn advancement
+      allOf:
+        - $ref: "#/components/schemas/CombatEncounterResponse"
+        - type: object
+          properties:
+            last_action:
+              $ref: "#/components/schemas/AttackActionResponse"
+              description: Most recent action resolved
+            combat_ended:
+              type: boolean
+              description: Whether combat ended after this action
+
+    CombatActionsResponse:
+      type: object
+      required:
+        - total
+        - skip
+        - limit
+        - actions
+      properties:
+        total:
+          type: integer
+          minimum: 0
+          description: Total actions in encounter
+        skip:
+          type: integer
+          minimum: 0
+          description: Number of records skipped
+        limit:
+          type: integer
+          minimum: 1
+          description: Page size
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttackActionResponse"
+
+    EnemyResponse:
+      type: object
+      required:
+        - id
+        - name
+        - max_health
+        - armor_class
+        - str_base
+        - dex_base
+        - int_base
+        - con_base
+        - cha_base
+        - str_modifier
+        - dex_modifier
+        - int_modifier
+        - con_modifier
+        - cha_modifier
+        - weapon_info
+        - current_ai_state
+        - flee_health_threshold
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        max_health:
+          type: integer
+          minimum: 1
+        armor_class:
+          type: integer
+          minimum: 10
+        str_base:
+          type: integer
+          minimum: 3
+          maximum: 18
+        dex_base:
+          type: integer
+          minimum: 3
+          maximum: 18
+        int_base:
+          type: integer
+          minimum: 3
+          maximum: 18
+        con_base:
+          type: integer
+          minimum: 3
+          maximum: 18
+        cha_base:
+          type: integer
+          minimum: 3
+          maximum: 18
+        str_modifier:
+          type: integer
+          description: Calculated from base
+        dex_modifier:
+          type: integer
+          description: Calculated from base
+        int_modifier:
+          type: integer
+          description: Calculated from base
+        con_modifier:
+          type: integer
+          description: Calculated from base
+        cha_modifier:
+          type: integer
+          description: Calculated from base
+        weapon_info:
+          type: string
+        current_ai_state:
+          type: string
+          enum:
+            - Aggressive
+            - Defensive
+            - Flee
+        flee_health_threshold:
+          type: number
+          minimum: 0.0
+          maximum: 1.0
+        created_at:
+          type: string
+          format: date-time
+
+    EnemyListResponse:
+      type: object
+      required:
+        - total
+        - skip
+        - limit
+        - enemies
+      properties:
+        total:
+          type: integer
+          minimum: 0
+          description: Total enemies available
+        skip:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+        enemies:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnemyResponse"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          enum:
+            - BadRequest
+            - NotFound
+            - Conflict
+            - InternalServerError
+          description: Error type
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          nullable: true
+          description: Optional additional error details

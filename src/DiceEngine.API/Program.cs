@@ -59,6 +59,14 @@ builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<ILootGeneratorService, LootGeneratorService>();
 builder.Services.AddScoped<ILootRepository, LootRepository>();
 
+// Register Combat services
+builder.Services.AddScoped<ICombatService, CombatService>();
+builder.Services.AddScoped<ICombatRepository, CombatRepository>();
+builder.Services.AddScoped<IEnemyRepository, EnemyRepository>();
+builder.Services.AddScoped<IInitiativeCalculator, InitiativeCalculator>();
+builder.Services.AddScoped<IAttackResolver, AttackResolver>();
+builder.Services.AddScoped<IDamageCalculator, DamageCalculator>();
+
 builder.Services.AddDbContext<DiceEngineDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
