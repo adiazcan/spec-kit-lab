@@ -1,0 +1,693 @@
+openapi: 3.0.1
+info:
+  title: Dice Engine - Quest System API
+  description: Multi-stage quest system with progress tracking, dependencies, and rewards
+  version: 1.0.0
+  contact:
+    name: Development Team
+
+servers:
+  - url: https://api.diceengine.local
+    description: Production API
+  - url: http://localhost:5000
+    description: Local development
+
+paths:
+  /adventures/{adventureId}/quests:
+    get:
+      summary: List all available quests for an adventure
+      operationId: listQuests
+      tags:
+        - Quests
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Adventure ID that owns the quests
+        - name: difficulty
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [Easy, Medium, Hard, Legendary]
+          description: Filter by quest difficulty
+        - name: skip
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of quests to skip (pagination)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+          description: Number of quests to return
+      responses:
+        "200":
+          description: List of available quests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/QuestSummary"
+                  totalCount:
+                    type: integer
+                  skip:
+                    type: integer
+                  limit:
+                    type: integer
+              example:
+                items:
+                  - questId: 550e8400-e29b-41d4-a716-446655440000
+                    name: The Bandit Caves
+                    description: Clear out the bandits from the mountain caves
+                    difficulty: Medium
+                    stageCount: 3
+                    isLocked: false
+                totalCount: 12
+                skip: 0
+                limit: 20
+        "404":
+          description: Adventure not found
+        "500":
+          description: Internal server error
+
+  /adventures/{adventureId}/quests/{questId}/accept:
+    post:
+      summary: Accept a quest (begin quest progress)
+      operationId: acceptQuest
+      tags:
+        - Quests
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Quest acceptance request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                playerId:
+                  type: string
+                  format: uuid
+                  description: Player accepting the quest
+              required:
+                - playerId
+      responses:
+        "201":
+          description: Quest accepted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestProgressFull"
+        "400":
+          description: Invalid request (playerId missing, quest invalid, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Quest not found
+                statusCode: 404
+        "409":
+          description: Conflict - cannot accept quest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Prerequisite quest 'Beginner Training' must be completed first
+                statusCode: 409
+        "422":
+          description: Unprocessable entity - duplicate active instance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Quest already active for this player
+                statusCode: 422
+
+  /adventures/{adventureId}/players/{playerId}/quests/active:
+    get:
+      summary: List all active quests for a player
+      operationId: listActiveQuests
+      tags:
+        - Progress
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of active quests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QuestProgressFull"
+        "404":
+          description: Player or adventure not found
+
+  /adventures/{adventureId}/quests/{questId}/progress:
+    get:
+      summary: Get current progress for a player in a specific quest
+      operationId: getQuestProgress
+      tags:
+        - Progress
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: playerId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Player ID requesting progress
+      responses:
+        "200":
+          description: Current quest progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestProgressFull"
+        "404":
+          description: Quest progress not found (quest not accepted or player not found)
+
+  /adventures/{adventureId}/quests/{questId}/stages/{stageNumber}/objectives/{objectiveId}/update:
+    patch:
+      summary: Update progress on a specific objective
+      operationId: updateObjectiveProgress
+      tags:
+        - Progress
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: stageNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: objectiveId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Objective progress update
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                playerId:
+                  type: string
+                  format: uuid
+                progressAmount:
+                  type: integer
+                  minimum: 1
+                  description: Amount to increment progress by
+              required:
+                - playerId
+                - progressAmount
+      responses:
+        "200":
+          description: Objective progress updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  objectiveId:
+                    type: string
+                    format: uuid
+                  currentProgress:
+                    type: integer
+                  targetAmount:
+                    type: integer
+                  isCompleted:
+                    type: boolean
+        "400":
+          description: Invalid progress amount or request
+        "404":
+          description: Objective, quest, or player not found
+        "409":
+          description: Conflict - objective already completed or stage failed
+
+  /adventures/{adventureId}/quests/{questId}/stages/{stageNumber}/complete:
+    post:
+      summary: Attempt to complete current stage (must all objectives complete)
+      operationId: completeStage
+      tags:
+        - Progress
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: stageNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        description: Stage completion request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                playerId:
+                  type: string
+                  format: uuid
+              required:
+                - playerId
+      responses:
+        "200":
+          description: Stage completed successfully, progressed to next stage or quest complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  questProgressId:
+                    type: string
+                    format: uuid
+                  currentStageNumber:
+                    type: integer
+                  questStatus:
+                    type: string
+                    enum: [Active, Completed, Failed]
+                  stageRewards:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Reward"
+                  message:
+                    type: string
+                    example: "Stage 2/3 completed! Progressing to Stage 3..."
+        "400":
+          description: Cannot complete stage - not all objectives complete
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Cannot complete stage - 2 objectives still incomplete
+                statusCode: 400
+        "404":
+          description: Quest progress or stage not found
+        "409":
+          description: Conflict - stage already completed or quest failed
+
+  /adventures/{adventureId}/quests/{questId}/abandon:
+    post:
+      summary: Abandon a quest in progress
+      operationId: abandonQuest
+      tags:
+        - Progress
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Quest abandonment request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                playerId:
+                  type: string
+                  format: uuid
+              required:
+                - playerId
+      responses:
+        "204":
+          description: Quest abandoned successfully
+        "404":
+          description: Quest progress not found
+        "409":
+          description: Conflict - quest already completed or failed
+
+  /adventures/{adventureId}/quests/{questId}/dependencies:
+    get:
+      summary: Get dependency information for a quest
+      operationId: getQuestDependencies
+      tags:
+        - Dependencies
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: questId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: playerId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: If provided, shows completion status of prerequisites for this player
+      responses:
+        "200":
+          description: Quest dependency information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  questId:
+                    type: string
+                    format: uuid
+                  prerequisites:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        prerequisiteQuestId:
+                          type: string
+                          format: uuid
+                        questName:
+                          type: string
+                        dependencyType:
+                          type: string
+                          enum: [MustComplete, MustNotFail]
+                        playerStatus:
+                          type: string
+                          enum: [NotStarted, Active, Completed, Failed]
+                          description: Only present if playerId in query
+                  allPrerequisitesMet:
+                    type: boolean
+                    description: Only present if playerId in query
+        "404":
+          description: Quest not found
+
+components:
+  schemas:
+    QuestSummary:
+      type: object
+      required:
+        - questId
+        - name
+        - difficulty
+        - stageCount
+        - isLocked
+      properties:
+        questId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 2000
+        difficulty:
+          type: string
+          enum: [Easy, Medium, Hard, Legendary]
+        stageCount:
+          type: integer
+          minimum: 1
+        isLocked:
+          type: boolean
+          description: True if player hasn't completed prerequisites
+        lockReason:
+          type: string
+          description: Human-readable reason quest is locked (if isLocked=true)
+
+    QuestProgressFull:
+      type: object
+      required:
+        - questProgressId
+        - questId
+        - playerId
+        - questName
+        - currentStageNumber
+        - totalStages
+        - status
+        - acceptedAt
+      properties:
+        questProgressId:
+          type: string
+          format: uuid
+        questId:
+          type: string
+          format: uuid
+        playerId:
+          type: string
+          format: uuid
+        questName:
+          type: string
+        questDescription:
+          type: string
+        currentStageNumber:
+          type: integer
+          minimum: 1
+        totalStages:
+          type: integer
+        progressPercentage:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        status:
+          type: string
+          enum: [Active, Completed, Failed, Abandoned]
+        currentStage:
+          $ref: "#/components/schemas/StageProgress"
+        acceptedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        failedAt:
+          type: string
+          format: date-time
+          nullable: true
+        abandonedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    StageProgress:
+      type: object
+      required:
+        - stageNumber
+        - title
+        - description
+        - isCompleted
+        - objectives
+      properties:
+        stageNumber:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        description:
+          type: string
+        isCompleted:
+          type: boolean
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        objectives:
+          type: array
+          items:
+            $ref: "#/components/schemas/ObjectiveProgress"
+        failureConditions:
+          type: array
+          items:
+            type: object
+            properties:
+              conditionType:
+                type: string
+              description:
+                type: string
+
+    ObjectiveProgress:
+      type: object
+      required:
+        - objectiveId
+        - description
+        - currentProgress
+        - targetAmount
+        - isCompleted
+      properties:
+        objectiveId:
+          type: string
+          format: uuid
+        description:
+          type: string
+        conditionType:
+          type: string
+          enum:
+            [
+              KillCount,
+              ItemCollected,
+              LocationVisit,
+              NpcInteraction,
+              DamageDealt,
+              TimeElapsed,
+              Custom,
+            ]
+        currentProgress:
+          type: integer
+          minimum: 0
+        targetAmount:
+          type: integer
+          minimum: 1
+        isCompleted:
+          type: boolean
+        progressPercentage:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+
+    Reward:
+      type: object
+      required:
+        - rewardId
+        - type
+        - amount
+      properties:
+        rewardId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [Experience, Item, Currency, Achievement]
+        amount:
+          type: integer
+          minimum: 1
+        itemId:
+          type: string
+          description: If type=Item, the item ID granted
+        itemName:
+          type: string
+          description: Human-readable item name if type=Item
+        description:
+          type: string
+          description: Human-readable description of reward
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - statusCode
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        statusCode:
+          type: integer
+        details:
+          type: object
+          description: Additional error details (validation errors, etc.)
+
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication (adventure context)
+
+security:
+  - ApiKey: []
+
+tags:
+  - name: Quests
+    description: Quest definition and enumeration endpoints
+  - name: Progress
+    description: Quest progress tracking and updates
+  - name: Dependencies
+    description: Quest prerequisite and dependency information

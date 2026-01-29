@@ -5,7 +5,7 @@
 **Status**: Draft  
 **Input**: User description: "Build a multi-stage quest system: Quests with multiple objectives/stages, Progress tracking per stage, Success and failure conditions, Quest state persistence, Rewards on completion, Quest dependencies (prerequisite quests)"
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Accept and Track Multi-Stage Quest (Priority: P1)
 
@@ -112,7 +112,7 @@ As a player, I want to view detailed information about my current quest stage an
 - What happens if a player disconnects during a stage transition - is progress saved properly?
 - What occurs if a player leaves the game without saving and a stage was partially completed?
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -139,7 +139,7 @@ As a player, I want to view detailed information about my current quest stage an
 - **Reward**: Represents benefits granted on quest completion. Contains: reward ID, reward type (experience, item, currency, achievement), amount, and applicability conditions
 - **QuestDependency**: Represents the relationship between a quest and its prerequisites. Contains: dependent quest ID, prerequisite quest ID, and requirement type (must complete, must not fail)
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

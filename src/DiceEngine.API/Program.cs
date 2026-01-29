@@ -1,4 +1,5 @@
 using DiceEngine.Application.Services;
+using DiceEngine.Application.Models;
 using DiceEngine.Infrastructure.Persistence;
 using DiceEngine.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,9 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure options
+builder.Services.Configure<QuestOptions>(builder.Configuration.GetSection("Quest"));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -66,6 +70,14 @@ builder.Services.AddScoped<IEnemyRepository, EnemyRepository>();
 builder.Services.AddScoped<IInitiativeCalculator, InitiativeCalculator>();
 builder.Services.AddScoped<IAttackResolver, AttackResolver>();
 builder.Services.AddScoped<IDamageCalculator, DamageCalculator>();
+
+// Register Quest services
+builder.Services.AddScoped<IQuestService, QuestService>();
+builder.Services.AddScoped<IQuestRepository, QuestRepository>();
+builder.Services.AddScoped<IStageProgressService, StageProgressService>();
+builder.Services.AddScoped<IRewardService, RewardService>();
+builder.Services.AddScoped<IConditionEvaluator, ConditionEvaluator>();
+builder.Services.AddScoped<IDependencyResolver, DependencyResolver>();
 
 builder.Services.AddDbContext<DiceEngineDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
