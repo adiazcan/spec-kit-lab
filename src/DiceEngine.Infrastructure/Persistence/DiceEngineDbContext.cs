@@ -19,7 +19,7 @@ public class DiceEngineDbContext : DbContext
     public DbSet<Adventure> Adventures { get; set; }
     public DbSet<Character> Characters { get; set; }
     public DbSet<CharacterSnapshot> CharacterSnapshots { get; set; }
-    
+
     // Inventory System
     public DbSet<Item> Items { get; set; }
     public DbSet<StackableItem> StackableItems { get; set; }
@@ -34,6 +34,17 @@ public class DiceEngineDbContext : DbContext
     public DbSet<Combatant> Combatants { get; set; }
     public DbSet<Enemy> Enemies { get; set; }
     public DbSet<AttackAction> AttackActions { get; set; }
+
+    // Quest System
+    public DbSet<Quest> Quests { get; set; }
+    public DbSet<QuestStage> QuestStages { get; set; }
+    public DbSet<QuestObjective> QuestObjectives { get; set; }
+    public DbSet<QuestProgress> QuestProgresses { get; set; }
+    public DbSet<StageProgress> StageProgresses { get; set; }
+    public DbSet<ObjectiveProgress> ObjectiveProgresses { get; set; }
+    public DbSet<QuestReward> QuestRewards { get; set; }
+    public DbSet<FailureCondition> FailureConditions { get; set; }
+    public DbSet<QuestDependency> QuestDependencies { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -183,7 +194,7 @@ public class DiceEngineDbContext : DbContext
                 .HasColumnType("jsonb")
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                    v => JsonSerializer.Deserialize<List<StatModifier>>(v, (JsonSerializerOptions?)null) 
+                    v => JsonSerializer.Deserialize<List<StatModifier>>(v, (JsonSerializerOptions?)null)
                          ?? new List<StatModifier>());
         });
 
@@ -441,6 +452,267 @@ public class DiceEngineDbContext : DbContext
             entity.HasIndex(e => new { e.CombatEncounterId, e.Timestamp });
 
             entity.ToTable("attack_actions");
+        });
+
+        // ============== QUEST SYSTEM ENTITIES ==============
+
+        // Configure Quest entity
+        modelBuilder.Entity<Quest>(entity =>
+        {
+            entity.HasKey(e => e.QuestId);
+
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(2000);
+
+            entity.Property(e => e.Difficulty)
+                .HasConversion<int>()
+                .IsRequired();
+
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.CreatedBy).HasMaxLength(255);
+            entity.Property(e => e.MaxConcurrentPlayers).IsRequired();
+
+            entity.HasMany(e => e.Stages)
+                .WithOne(s => s.Quest)
+                .HasForeignKey(s => s.QuestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.Name);
+            entity.HasIndex(e => e.Difficulty);
+
+            entity.ToTable("quests");
+        });
+
+        // Configure QuestStage entity
+        modelBuilder.Entity<QuestStage>(entity =>
+        {
+            entity.HasKey(e => e.StageId);
+
+            entity.Property(e => e.QuestId).IsRequired();
+            entity.Property(e => e.StageNumber).IsRequired();
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(1000);
+
+            entity.HasOne(e => e.Quest)
+                .WithMany(q => q.Stages)
+                .HasForeignKey(e => e.QuestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(e => e.Objectives)
+                .WithOne(o => o.Stage)
+                .HasForeignKey(o => o.StageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique constraint: (QuestId, StageNumber)
+            entity.HasIndex(e => new { e.QuestId, e.StageNumber }).IsUnique();
+
+            entity.ToTable("quest_stages");
+        });
+
+        // Configure QuestObjective entity
+        modelBuilder.Entity<QuestObjective>(entity =>
+        {
+            entity.HasKey(e => e.ObjectiveId);
+
+            entity.Property(e => e.StageId).IsRequired();
+            entity.Property(e => e.ObjectiveNumber).IsRequired();
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(500);
+
+            entity.Property(e => e.ConditionType)
+                .HasConversion<int>()
+                .IsRequired();
+
+            entity.Property(e => e.TargetAmount).IsRequired();
+            entity.Property(e => e.Metadata).HasColumnType("jsonb");
+
+            entity.HasOne(e => e.Stage)
+                .WithMany(s => s.Objectives)
+                .HasForeignKey(e => e.StageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique constraint: (StageId, ObjectiveNumber)
+            entity.HasIndex(e => new { e.StageId, e.ObjectiveNumber }).IsUnique();
+
+            entity.ToTable("quest_objectives");
+        });
+
+        // Configure QuestProgress entity
+        modelBuilder.Entity<QuestProgress>(entity =>
+        {
+            entity.HasKey(e => e.QuestProgressId);
+
+            entity.Property(e => e.PlayerId).IsRequired();
+            entity.Property(e => e.QuestId).IsRequired();
+            entity.Property(e => e.CurrentStageNumber).IsRequired();
+
+            entity.Property(e => e.Status)
+                .HasConversion<int>()
+                .IsRequired();
+
+            entity.Property(e => e.AcceptedAt).IsRequired();
+            entity.Property(e => e.CompletedAt);
+            entity.Property(e => e.FailedAt);
+            entity.Property(e => e.AbandonedAt);
+            entity.Property(e => e.LastModified).IsRequired();
+
+            entity.Property(e => e.RowVersion)
+                .IsRowVersion();
+
+            entity.HasOne(e => e.Quest)
+                .WithMany()
+                .HasForeignKey(e => e.QuestId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.StageProgress)
+                .WithOne(s => s.QuestProgress)
+                .HasForeignKey(s => s.QuestProgressId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique constraint: (PlayerId, QuestId)
+            entity.HasIndex(e => new { e.PlayerId, e.QuestId }).IsUnique();
+            entity.HasIndex(e => new { e.PlayerId, e.Status });
+            entity.HasIndex(e => e.QuestId);
+
+            entity.ToTable("quest_progress");
+        });
+
+        // Configure StageProgress entity
+        modelBuilder.Entity<StageProgress>(entity =>
+        {
+            entity.HasKey(e => e.StageProgressId);
+
+            entity.Property(e => e.QuestProgressId).IsRequired();
+            entity.Property(e => e.StageId).IsRequired();
+            entity.Property(e => e.StageNumber).IsRequired();
+            entity.Property(e => e.IsCompleted).IsRequired();
+            entity.Property(e => e.CompletedAt);
+
+            entity.HasOne(e => e.QuestProgress)
+                .WithMany(q => q.StageProgress)
+                .HasForeignKey(e => e.QuestProgressId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Stage)
+                .WithMany()
+                .HasForeignKey(e => e.StageId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.ObjectiveProgress)
+                .WithOne(o => o.StageProgress)
+                .HasForeignKey(o => o.StageProgressId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.QuestProgressId);
+
+            entity.ToTable("stage_progress");
+        });
+
+        // Configure ObjectiveProgress entity
+        modelBuilder.Entity<ObjectiveProgress>(entity =>
+        {
+            entity.HasKey(e => e.ObjectiveProgressId);
+
+            entity.Property(e => e.StageProgressId).IsRequired();
+            entity.Property(e => e.ObjectiveId).IsRequired();
+            entity.Property(e => e.CurrentProgress).IsRequired();
+            entity.Property(e => e.TargetAmount).IsRequired();
+            entity.Property(e => e.IsCompleted).IsRequired();
+
+            entity.HasOne(e => e.StageProgress)
+                .WithMany(s => s.ObjectiveProgress)
+                .HasForeignKey(e => e.StageProgressId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Objective)
+                .WithMany()
+                .HasForeignKey(e => e.ObjectiveId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.StageProgressId);
+
+            entity.ToTable("objective_progress");
+        });
+
+        // Configure QuestReward entity
+        modelBuilder.Entity<QuestReward>(entity =>
+        {
+            entity.HasKey(e => e.RewardId);
+
+            entity.Property(e => e.QuestId);
+            entity.Property(e => e.StageId);
+
+            entity.Property(e => e.Type)
+                .HasConversion<int>()
+                .IsRequired();
+
+            entity.Property(e => e.Amount).IsRequired();
+            entity.Property(e => e.ItemId).HasMaxLength(255);
+
+            entity.HasOne(e => e.Quest)
+                .WithMany(q => q.Rewards)
+                .HasForeignKey(e => e.QuestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Stage)
+                .WithMany(s => s.StageRewards)
+                .HasForeignKey(e => e.StageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.QuestId);
+            entity.HasIndex(e => e.StageId);
+
+            entity.ToTable("quest_rewards");
+        });
+
+        // Configure FailureCondition entity
+        modelBuilder.Entity<FailureCondition>(entity =>
+        {
+            entity.HasKey(e => e.FailureConditionId);
+
+            entity.Property(e => e.StageId).IsRequired();
+
+            entity.Property(e => e.ConditionType)
+                .HasConversion<int>()
+                .IsRequired();
+
+            entity.Property(e => e.Metadata).HasColumnType("jsonb");
+
+            entity.HasOne(e => e.Stage)
+                .WithMany(s => s.FailureConditions)
+                .HasForeignKey(e => e.StageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.StageId);
+
+            entity.ToTable("failure_conditions");
+        });
+
+        // Configure QuestDependency entity
+        modelBuilder.Entity<QuestDependency>(entity =>
+        {
+            entity.HasKey(e => e.DependencyId);
+
+            entity.Property(e => e.DependentQuestId).IsRequired();
+            entity.Property(e => e.PrerequisiteQuestId).IsRequired();
+
+            entity.Property(e => e.Type)
+                .HasConversion<int>()
+                .IsRequired();
+
+            entity.HasOne(e => e.DependentQuest)
+                .WithMany(q => q.Dependencies)
+                .HasForeignKey(e => e.DependentQuestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.PrerequisiteQuest)
+                .WithMany(q => q.DependentQuests)
+                .HasForeignKey(e => e.PrerequisiteQuestId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Unique constraint: (DependentQuestId, PrerequisiteQuestId)
+            entity.HasIndex(e => new { e.DependentQuestId, e.PrerequisiteQuestId }).IsUnique();
+
+            entity.ToTable("quest_dependencies");
         });
     }
 }
