@@ -43,10 +43,34 @@ builder.Services.AddScoped<IAdventureRepository, AdventureRepository>();
 builder.Services.AddScoped<ICharacterService, CharacterService>();
 builder.Services.AddScoped<ICharacterRepository, CharacterRepository>();
 
+// Register Inventory services
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+
+// Register Equipment services
+builder.Services.AddScoped<IEquipmentService, EquipmentService>();
+builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
+
+// Register Item services
+builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IItemRepository, ItemRepository>();
+
+// Register Loot services
+builder.Services.AddScoped<ILootGeneratorService, LootGeneratorService>();
+builder.Services.AddScoped<ILootRepository, LootRepository>();
+
 builder.Services.AddDbContext<DiceEngineDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+
+// Seed database in development environment
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<DiceEngineDbContext>();
+    await SeedData.InitializeAsync(context);
+}
 
 // Enable Swagger UI in all environments for demonstration purposes
 app.UseSwagger();

@@ -1,0 +1,1172 @@
+openapi: 3.0.1
+info:
+  title: Inventory Management API
+  description: |
+    Inventory Management system for the Text Adventure Game.
+    Provides operations for managing stackable and unique items, equipment slots,
+    and loot table generation with weighted random selection.
+  version: '1.0.0'
+  contact:
+    name: Game API Support
+
+servers:
+  - url: http://localhost:5000/api
+    description: Development server
+  - url: /api
+    description: Relative path (production)
+
+tags:
+  - name: Inventory
+    description: Inventory management operations for adventures
+  - name: Equipment
+    description: Character equipment slot management
+  - name: Loot Tables
+    description: Loot generation from weighted tables
+  - name: Items
+    description: Item catalog management (admin)
+
+paths:
+  /adventures/{adventureId}/inventory:
+    get:
+      tags:
+        - Inventory
+      summary: Get adventure inventory
+      operationId: getInventory
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The adventure ID
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+          description: Maximum items to return
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+          description: Offset for pagination
+      responses:
+        '200':
+          description: Inventory retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryResponse'
+              examples:
+                mixedInventory:
+                  summary: Inventory with stackable and unique items
+                  value:
+                    adventureId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    entries:
+                      - id: "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                        item:
+                          id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                          name: "Healing Potion"
+                          description: "Restores 50 HP"
+                          rarity: "Common"
+                          itemType: "Stackable"
+                          maxStackSize: 100
+                        quantity: 8
+                        addedAt: "2026-01-29T10:30:00Z"
+                      - id: "2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e"
+                        item:
+                          id: "b2c3d4e5-f678-90ab-cdef-123456789012"
+                          name: "Iron Longsword"
+                          description: "A sturdy blade"
+                          rarity: "Uncommon"
+                          itemType: "Unique"
+                          slotType: "MainHand"
+                          modifiers:
+                            - statName: "Attack"
+                              value: 2
+                        quantity: 1
+                        addedAt: "2026-01-29T11:00:00Z"
+                    totalEntries: 2
+                    limit: 50
+                    offset: 0
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags:
+        - Inventory
+      summary: Add item to inventory
+      operationId: addItem
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The adventure ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddItemRequest'
+            examples:
+              addStackable:
+                summary: Add 5 healing potions
+                value:
+                  itemId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                  quantity: 5
+              addUnique:
+                summary: Add longsword (quantity 1)
+                value:
+                  itemId: "b2c3d4e5-f678-90ab-cdef-123456789012"
+                  quantity: 1
+      responses:
+        '201':
+          description: Item added successfully (or merged with existing stack)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddItemResponse'
+              examples:
+                newStack:
+                  summary: New stackable item added
+                  value:
+                    entryId: "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                    itemId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    quantity: 5
+                    merged: false
+                mergedStack:
+                  summary: Stackable item merged with existing stack
+                  value:
+                    entryId: "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                    itemId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    quantity: 13
+                    merged: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Inventory full (max 100 entries) or stack full (max 100 per stack)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                message: "Inventory full: maximum 100 unique items reached"
+                errors: []
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /adventures/{adventureId}/inventory/{entryId}:
+    delete:
+      tags:
+        - Inventory
+      summary: Remove item from inventory
+      operationId: removeItem
+      parameters:
+        - name: adventureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The adventure ID
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The inventory entry ID
+        - name: quantity
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Quantity to remove (for stackable items)
+      responses:
+        '204':
+          description: Item removed successfully (entry deleted if quantity reaches 0)
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /characters/{characterId}/equipment:
+    get:
+      tags:
+        - Equipment
+      summary: Get character equipment
+      operationId: getEquipment
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The character ID
+      responses:
+        '200':
+          description: Equipment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentResponse'
+              examples:
+                partiallyEquipped:
+                  summary: Character with some slots filled
+                  value:
+                    characterId: "4fa85f64-5717-4562-b3fc-2c963f66afa7"
+                    slots:
+                      - slotType: "Head"
+                        equippedItem: null
+                        equippedAt: null
+                      - slotType: "Chest"
+                        equippedItem:
+                          id: "c3d4e5f6-7890-abcd-ef12-345678901234"
+                          name: "Iron Breastplate"
+                          description: "Sturdy armor"
+                          rarity: "Uncommon"
+                          slotType: "Chest"
+                          modifiers:
+                            - statName: "Defense"
+                              value: 3
+                        equippedAt: "2026-01-29T12:00:00Z"
+                      - slotType: "Hands"
+                        equippedItem: null
+                        equippedAt: null
+                      - slotType: "Legs"
+                        equippedItem: null
+                        equippedAt: null
+                      - slotType: "Feet"
+                        equippedItem: null
+                        equippedAt: null
+                      - slotType: "MainHand"
+                        equippedItem:
+                          id: "b2c3d4e5-f678-90ab-cdef-123456789012"
+                          name: "Iron Longsword"
+                          description: "A sturdy blade"
+                          rarity: "Uncommon"
+                          slotType: "MainHand"
+                          modifiers:
+                            - statName: "Attack"
+                              value: 2
+                        equippedAt: "2026-01-29T11:30:00Z"
+                      - slotType: "OffHand"
+                        equippedItem: null
+                        equippedAt: null
+                    totalModifiers:
+                      Attack: 2
+                      Defense: 3
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /characters/{characterId}/equipment/{slotType}:
+    put:
+      tags:
+        - Equipment
+      summary: Equip item to slot
+      operationId: equipItem
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The character ID
+        - name: slotType
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/SlotType'
+          description: The equipment slot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipItemRequest'
+            examples:
+              equipWeapon:
+                summary: Equip longsword to main hand
+                value:
+                  itemId: "b2c3d4e5-f678-90ab-cdef-123456789012"
+                  adventureId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+      responses:
+        '200':
+          description: Item equipped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipItemResponse'
+              example:
+                slotType: "MainHand"
+                equippedItem:
+                  id: "b2c3d4e5-f678-90ab-cdef-123456789012"
+                  name: "Iron Longsword"
+                  description: "A sturdy blade"
+                  rarity: "Uncommon"
+                  slotType: "MainHand"
+                  modifiers:
+                    - statName: "Attack"
+                      value: 2
+                equippedAt: "2026-01-29T14:00:00Z"
+                previousItem: null
+        '400':
+          description: Invalid equip request (wrong slot type, not equippable, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                wrongSlot:
+                  summary: Item cannot be equipped to this slot
+                  value:
+                    message: "Item cannot be equipped to MainHand slot"
+                    errors:
+                      - "Item slotType is Chest, expected MainHand"
+                notInInventory:
+                  summary: Item not in adventure inventory
+                  value:
+                    message: "Item not found in adventure inventory"
+                    errors:
+                      - "ItemId b2c3d4e5-f678-90ab-cdef-123456789012 not in inventory"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      tags:
+        - Equipment
+      summary: Unequip item from slot
+      operationId: unequipItem
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The character ID
+        - name: slotType
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/SlotType'
+          description: The equipment slot
+        - name: adventureId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Adventure to return item to
+      responses:
+        '200':
+          description: Item unequipped successfully (returned to inventory)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnequipItemResponse'
+              example:
+                slotType: "MainHand"
+                unequippedItem:
+                  id: "b2c3d4e5-f678-90ab-cdef-123456789012"
+                  name: "Iron Longsword"
+                  description: "A sturdy blade"
+                  rarity: "Uncommon"
+                  slotType: "MainHand"
+                  modifiers:
+                    - statName: "Attack"
+                      value: 2
+                returnedToInventory: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /loot-tables/{lootTableId}/generate:
+    post:
+      tags:
+        - Loot Tables
+      summary: Generate loot from table
+      operationId: generateLoot
+      parameters:
+        - name: lootTableId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The loot table ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateLootRequest'
+            examples:
+              singleRoll:
+                summary: Generate one item from goblin loot table
+                value:
+                  adventureId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  count: 1
+              multiRoll:
+                summary: Generate three items (treasure chest)
+                value:
+                  adventureId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  count: 3
+      responses:
+        '200':
+          description: Loot generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateLootResponse'
+              examples:
+                singleItem:
+                  summary: One item generated
+                  value:
+                    lootTableId: "5fa85f64-5717-4562-b3fc-2c963f66afa8"
+                    adventureId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    generatedItems:
+                      - item:
+                          id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                          name: "Healing Potion"
+                          description: "Restores 50 HP"
+                          rarity: "Common"
+                          itemType: "Stackable"
+                          maxStackSize: 100
+                        quantity: 3
+                        rollResult: 45
+                        weight: 60
+                    addedToInventory: true
+                multipleItems:
+                  summary: Three items generated
+                  value:
+                    lootTableId: "5fa85f64-5717-4562-b3fc-2c963f66afa8"
+                    adventureId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                    generatedItems:
+                      - item:
+                          id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                          name: "Healing Potion"
+                          description: "Restores 50 HP"
+                          rarity: "Common"
+                          itemType: "Stackable"
+                          maxStackSize: 100
+                        quantity: 2
+                        rollResult: 35
+                        weight: 60
+                      - item:
+                          id: "d4e5f678-90ab-cdef-1234-567890123456"
+                          name: "Gold Coins"
+                          description: "Currency"
+                          rarity: "Common"
+                          itemType: "Stackable"
+                          maxStackSize: 100
+                        quantity: 10
+                        rollResult: 78
+                        weight: 30
+                      - item:
+                          id: "b2c3d4e5-f678-90ab-cdef-123456789012"
+                          name: "Iron Dagger"
+                          description: "A small blade"
+                          rarity: "Uncommon"
+                          itemType: "Unique"
+                          slotType: "MainHand"
+                          modifiers:
+                            - statName: "Attack"
+                              value: 1
+                        quantity: 1
+                        rollResult: 95
+                        weight: 10
+                    addedToInventory: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /loot-tables:
+    get:
+      tags:
+        - Loot Tables
+      summary: List all loot tables
+      operationId: listLootTables
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Loot tables retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LootTableListResponse'
+              example:
+                lootTables:
+                  - id: "5fa85f64-5717-4562-b3fc-2c963f66afa8"
+                    name: "Goblin Loot"
+                    description: "Common enemy drops"
+                    entryCount: 3
+                  - id: "6fa85f64-5717-4562-b3fc-2c963f66afa9"
+                    name: "Treasure Chest"
+                    description: "Multiple valuable items"
+                    entryCount: 5
+                totalCount: 2
+                limit: 50
+                offset: 0
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /loot-tables/{lootTableId}:
+    get:
+      tags:
+        - Loot Tables
+      summary: Get loot table details
+      operationId: getLootTable
+      parameters:
+        - name: lootTableId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The loot table ID
+      responses:
+        '200':
+          description: Loot table retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LootTableDetailsResponse'
+              example:
+                id: "5fa85f64-5717-4562-b3fc-2c963f66afa8"
+                name: "Goblin Loot"
+                description: "Common enemy drops"
+                entries:
+                  - id: "7fa85f64-5717-4562-b3fc-2c963f66afaa"
+                    item:
+                      id: "d4e5f678-90ab-cdef-1234-567890123456"
+                      name: "Gold Coins"
+                      description: "Currency"
+                      rarity: "Common"
+                      itemType: "Stackable"
+                      maxStackSize: 100
+                    weight: 60
+                    quantity: 10
+                  - id: "8fa85f64-5717-4562-b3fc-2c963f66afab"
+                    item:
+                      id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                      name: "Healing Potion"
+                      description: "Restores 50 HP"
+                      rarity: "Common"
+                      itemType: "Stackable"
+                      maxStackSize: 100
+                    weight: 30
+                    quantity: 2
+                  - id: "9fa85f64-5717-4562-b3fc-2c963f66afac"
+                    item:
+                      id: "e5f67890-abcd-ef12-3456-789012345678"
+                      name: "Iron Dagger"
+                      description: "A small blade"
+                      rarity: "Uncommon"
+                      itemType: "Unique"
+                      slotType: "MainHand"
+                      modifiers:
+                        - statName: "Attack"
+                          value: 1
+                    weight: 10
+                    quantity: 1
+                totalWeight: 100
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /items:
+    get:
+      tags:
+        - Items
+      summary: List all items (admin)
+      operationId: listItems
+      parameters:
+        - name: itemType
+          in: query
+          schema:
+            type: string
+            enum: [Stackable, Unique]
+          description: Filter by item type
+        - name: rarity
+          in: query
+          schema:
+            $ref: '#/components/schemas/ItemRarity'
+          description: Filter by rarity
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Items retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemListResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    post:
+      tags:
+        - Items
+      summary: Create new item (admin)
+      operationId: createItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/CreateStackableItemRequest'
+                - $ref: '#/components/schemas/CreateUniqueItemRequest'
+            examples:
+              createStackable:
+                summary: Create healing potion
+                value:
+                  itemType: "Stackable"
+                  name: "Healing Potion"
+                  description: "Restores 50 HP"
+                  rarity: "Common"
+                  maxStackSize: 100
+              createUnique:
+                summary: Create iron longsword
+                value:
+                  itemType: "Unique"
+                  name: "Iron Longsword"
+                  description: "A sturdy blade"
+                  rarity: "Uncommon"
+                  slotType: "MainHand"
+                  modifiers:
+                    - statName: "Attack"
+                      value: 2
+      responses:
+        '201':
+          description: Item created successfully
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/StackableItemDto'
+                  - $ref: '#/components/schemas/UniqueItemDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    # Base item schemas
+    ItemRarity:
+      type: string
+      enum: [Common, Uncommon, Rare, Epic, Legendary]
+    
+    SlotType:
+      type: string
+      enum: [Head, Chest, Hands, Legs, Feet, MainHand, OffHand]
+    
+    StatModifier:
+      type: object
+      required: [statName, value]
+      properties:
+        statName:
+          type: string
+          description: Target stat (e.g., "Attack", "Defense", "STR")
+        value:
+          type: integer
+          description: Modifier amount (positive or negative)
+      example:
+        statName: "Defense"
+        value: 2
+    
+    StackableItemDto:
+      type: object
+      required: [id, name, rarity, itemType, maxStackSize]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        rarity:
+          $ref: '#/components/schemas/ItemRarity'
+        itemType:
+          type: string
+          enum: [Stackable]
+        maxStackSize:
+          type: integer
+          minimum: 1
+          default: 100
+    
+    UniqueItemDto:
+      type: object
+      required: [id, name, rarity, itemType]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        rarity:
+          $ref: '#/components/schemas/ItemRarity'
+        itemType:
+          type: string
+          enum: [Unique]
+        slotType:
+          $ref: '#/components/schemas/SlotType'
+          nullable: true
+        modifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatModifier'
+          default: []
+    
+    # Inventory schemas
+    InventoryEntryDto:
+      type: object
+      required: [id, item, quantity, addedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Inventory entry ID
+        item:
+          oneOf:
+            - $ref: '#/components/schemas/StackableItemDto'
+            - $ref: '#/components/schemas/UniqueItemDto'
+        quantity:
+          type: integer
+          minimum: 1
+          description: Stack size (always 1 for unique items)
+        addedAt:
+          type: string
+          format: date-time
+          description: When item was acquired
+    
+    InventoryResponse:
+      type: object
+      required: [adventureId, entries, totalEntries, limit, offset]
+      properties:
+        adventureId:
+          type: string
+          format: uuid
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryEntryDto'
+        totalEntries:
+          type: integer
+          description: Total count (for pagination)
+        limit:
+          type: integer
+        offset:
+          type: integer
+    
+    AddItemRequest:
+      type: object
+      required: [itemId, quantity]
+      properties:
+        itemId:
+          type: string
+          format: uuid
+          description: ID of item to add
+        quantity:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Quantity to add
+    
+    AddItemResponse:
+      type: object
+      required: [entryId, itemId, quantity, merged]
+      properties:
+        entryId:
+          type: string
+          format: uuid
+          description: Inventory entry ID (new or existing)
+        itemId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          description: Total quantity after add
+        merged:
+          type: boolean
+          description: Whether item was merged with existing stack
+    
+    # Equipment schemas
+    EquipmentSlotDto:
+      type: object
+      required: [slotType]
+      properties:
+        slotType:
+          $ref: '#/components/schemas/SlotType'
+        equippedItem:
+          $ref: '#/components/schemas/UniqueItemDto'
+          nullable: true
+        equippedAt:
+          type: string
+          format: date-time
+          nullable: true
+    
+    EquipmentResponse:
+      type: object
+      required: [characterId, slots, totalModifiers]
+      properties:
+        characterId:
+          type: string
+          format: uuid
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquipmentSlotDto'
+          minItems: 7
+          maxItems: 7
+          description: All 7 equipment slots
+        totalModifiers:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Sum of all modifiers from equipped items
+          example:
+            Attack: 3
+            Defense: 5
+            STR: 1
+    
+    EquipItemRequest:
+      type: object
+      required: [itemId, adventureId]
+      properties:
+        itemId:
+          type: string
+          format: uuid
+          description: Unique item to equip (must be in inventory)
+        adventureId:
+          type: string
+          format: uuid
+          description: Adventure containing the item
+    
+    EquipItemResponse:
+      type: object
+      required: [slotType, equippedItem, equippedAt]
+      properties:
+        slotType:
+          $ref: '#/components/schemas/SlotType'
+        equippedItem:
+          $ref: '#/components/schemas/UniqueItemDto'
+        equippedAt:
+          type: string
+          format: date-time
+        previousItem:
+          $ref: '#/components/schemas/UniqueItemDto'
+          nullable: true
+          description: Item that was unequipped (if slot was occupied)
+    
+    UnequipItemResponse:
+      type: object
+      required: [slotType, returnedToInventory]
+      properties:
+        slotType:
+          $ref: '#/components/schemas/SlotType'
+        unequippedItem:
+          $ref: '#/components/schemas/UniqueItemDto'
+          nullable: true
+        returnedToInventory:
+          type: boolean
+          description: Whether item was returned to adventure inventory
+    
+    # Loot generation schemas
+    GenerateLootRequest:
+      type: object
+      required: [adventureId]
+      properties:
+        adventureId:
+          type: string
+          format: uuid
+          description: Adventure to add generated items to
+        count:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 1
+          description: Number of items to generate
+    
+    GeneratedItemDto:
+      type: object
+      required: [item, quantity, rollResult, weight]
+      properties:
+        item:
+          oneOf:
+            - $ref: '#/components/schemas/StackableItemDto'
+            - $ref: '#/components/schemas/UniqueItemDto'
+        quantity:
+          type: integer
+          minimum: 1
+          description: Quantity generated (from loot table entry)
+        rollResult:
+          type: integer
+          description: Dice roll result
+        weight:
+          type: integer
+          description: Entry weight that was selected
+    
+    GenerateLootResponse:
+      type: object
+      required: [lootTableId, adventureId, generatedItems, addedToInventory]
+      properties:
+        lootTableId:
+          type: string
+          format: uuid
+        adventureId:
+          type: string
+          format: uuid
+        generatedItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeneratedItemDto'
+          minItems: 1
+        addedToInventory:
+          type: boolean
+          description: Whether items were added to adventure inventory
+    
+    LootTableSummaryDto:
+      type: object
+      required: [id, name, entryCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        entryCount:
+          type: integer
+          description: Number of entries in table
+    
+    LootTableListResponse:
+      type: object
+      required: [lootTables, totalCount, limit, offset]
+      properties:
+        lootTables:
+          type: array
+          items:
+            $ref: '#/components/schemas/LootTableSummaryDto'
+        totalCount:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+    
+    LootTableEntryDto:
+      type: object
+      required: [id, item, weight, quantity]
+      properties:
+        id:
+          type: string
+          format: uuid
+        item:
+          oneOf:
+            - $ref: '#/components/schemas/StackableItemDto'
+            - $ref: '#/components/schemas/UniqueItemDto'
+        weight:
+          type: integer
+          minimum: 1
+          description: Relative probability weight
+        quantity:
+          type: integer
+          minimum: 1
+          description: Quantity to grant when selected
+    
+    LootTableDetailsResponse:
+      type: object
+      required: [id, name, entries, totalWeight]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LootTableEntryDto'
+        totalWeight:
+          type: integer
+          description: Sum of all entry weights
+    
+    # Item creation schemas (admin)
+    CreateStackableItemRequest:
+      type: object
+      required: [itemType, name, rarity, maxStackSize]
+      properties:
+        itemType:
+          type: string
+          enum: [Stackable]
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        rarity:
+          $ref: '#/components/schemas/ItemRarity'
+        maxStackSize:
+          type: integer
+          minimum: 1
+          default: 100
+    
+    CreateUniqueItemRequest:
+      type: object
+      required: [itemType, name, rarity]
+      properties:
+        itemType:
+          type: string
+          enum: [Unique]
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        rarity:
+          $ref: '#/components/schemas/ItemRarity'
+        slotType:
+          $ref: '#/components/schemas/SlotType'
+          nullable: true
+        modifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatModifier'
+          default: []
+    
+    ItemListResponse:
+      type: object
+      required: [items, totalCount, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/StackableItemDto'
+              - $ref: '#/components/schemas/UniqueItemDto'
+        totalCount:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+    
+    # Standard error response
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: Human-readable error message
+        errors:
+          type: array
+          items:
+            type: string
+          description: Detailed validation errors
+          default: []
+  
+  responses:
+    BadRequest:
+      description: Invalid request parameters or validation failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "Validation failed"
+            errors:
+              - "Quantity must be greater than 0"
+              - "ItemId is required"
+    
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "Resource not found"
+            errors:
+              - "Adventure with ID 3fa85f64-5717-4562-b3fc-2c963f66afa6 does not exist"
+    
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: "An unexpected error occurred"
+            errors: []
