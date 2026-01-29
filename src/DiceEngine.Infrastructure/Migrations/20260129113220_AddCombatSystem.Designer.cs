@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DiceEngine.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DiceEngine.Infrastructure.Migrations
 {
     [DbContext(typeof(DiceEngineDbContext))]
-    partial class DiceEngineDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260129113220_AddCombatSystem")]
+    partial class AddCombatSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
