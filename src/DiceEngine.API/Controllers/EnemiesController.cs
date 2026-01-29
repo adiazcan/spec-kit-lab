@@ -58,15 +58,15 @@ public class EnemiesController : ControllerBase
                 request.EquippedWeapon,
                 request.FleeHealthThreshold);
 
-        await _enemyRepository.AddEnemyAsync(enemy);
-        await _enemyRepository.SaveChangesAsync();
+            await _enemyRepository.AddEnemyAsync(enemy);
+            await _enemyRepository.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetEnemy), new { id = enemy.Id }, MapEnemyToResponse(enemy));
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new ErrorResponse { Code = "INVALID_REQUEST", Message = ex.Message });
-            }
+            return CreatedAtAction(nameof(GetEnemy), new { id = enemy.Id }, MapEnemyToResponse(enemy));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ErrorResponse { Code = "INVALID_REQUEST", Message = ex.Message });
+        }
     }
 
     /// <summary>
@@ -145,7 +145,7 @@ public class EnemiesController : ControllerBase
                 request.FleeHealthThreshold);
 
             await _enemyRepository.UpdateEnemyAsync(updatedEnemy);
-        await _enemyRepository.SaveChangesAsync();
+            await _enemyRepository.SaveChangesAsync();
 
             return Ok(MapEnemyToResponse(updatedEnemy));
         }
