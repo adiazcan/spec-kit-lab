@@ -35,14 +35,14 @@ This task breakdown implements the Turn-Based Combat System with NPC/enemy AI st
 
 ### Database & Configuration Tasks
 
-- [ ] T001 Create database migration 005_AddCombatSystem in src/DiceEngine.Infrastructure/Migrations/
-- [ ] T002 Configure CombatEncounter entity with EF Core in src/DiceEngine.Infrastructure/Persistence/DiceEngineDbContext.cs
-- [ ] T003 Configure Combatant entity with EF Core in src/DiceEngine.Infrastructure/Persistence/DiceEngineDbContext.cs
-- [ ] T004 Configure Enemy entity with EF Core in src/DiceEngine.Infrastructure/Persistence/DiceEngineDbContext.cs
-- [ ] T005 Configure AttackAction entity with EF Core in src/DiceEngine.Infrastructure/Persistence/DiceEngineDbContext.cs
-- [ ] T006 [P] Add combat-related enums (CombatStatus, CombatSide, CombatantType, CombatantStatus, AIState) in src/DiceEngine.Domain/Entities/
-- [ ] T007 Register CombatService and related services in src/DiceEngine.API/Program.cs
-- [ ] T008 Apply database migration and verify schema in database
+- [X] T001 Create database migration 005_AddCombatSystem in src/DiceEngine.Infrastructure/Migrations/
+- [X] T002 Configure CombatEncounter entity with EF Core in src/DiceEngine.Infrastructure/Persistence/DiceEngineDbContext.cs
+- [X] T003 Configure Combatant entity with EF Core in src/DiceEngine.Infrastructure/Persistence/DiceEngineDbContext.cs
+- [X] T004 Configure Enemy entity with EF Core in src/DiceEngine.Infrastructure/Persistence/DiceEngineDbContext.cs
+- [X] T005 Configure AttackAction entity with EF Core in src/DiceEngine.Infrastructure/Persistence/DiceEngineDbContext.cs
+- [X] T006 [P] Add combat-related enums (CombatStatus, CombatSide, CombatantType, CombatantStatus, AIState) in src/DiceEngine.Domain/Entities/
+- [X] T007 Register CombatService and related services in src/DiceEngine.API/Program.cs
+- [X] T008 Apply database migration and verify schema in database
 
 ---
 
@@ -54,15 +54,15 @@ This task breakdown implements the Turn-Based Combat System with NPC/enemy AI st
 
 ### Domain Entities
 
-- [ ] T009 [P] Create CombatStatus, CombatSide enums in src/DiceEngine.Domain/Entities/CombatEncounter.cs
-- [ ] T010 [P] Create CombatantType, CombatantStatus enums in src/DiceEngine.Domain/Entities/Combatant.cs
-- [ ] T011 [P] Create AIState enum in src/DiceEngine.Domain/Entities/Enemy.cs
-- [ ] T012 Create CombatEncounter entity (aggregate root) in src/DiceEngine.Domain/Entities/CombatEncounter.cs
-- [ ] T013 [P] Create Combatant entity in src/DiceEngine.Domain/Entities/Combatant.cs
-- [ ] T014 [P] Create Enemy entity (aggregate root) in src/DiceEngine.Domain/Entities/Enemy.cs
-- [ ] T015 [P] Create AttackAction record (value object) in src/DiceEngine.Domain/ValueObjects/AttackAction.cs
-- [ ] T016 [P] Create InitiativeEntry record (value object) in src/DiceEngine.Domain/ValueObjects/InitiativeEntry.cs
-- [ ] T017 [P] Create CombatOutcome value object in src/DiceEngine.Domain/ValueObjects/CombatOutcome.cs
+- [X] T009 [P] Create CombatStatus, CombatSide enums in src/DiceEngine.Domain/Entities/CombatEncounter.cs
+- [X] T010 [P] Create CombatantType, CombatantStatus enums in src/DiceEngine.Domain/Entities/Combatant.cs
+- [X] T011 [P] Create AIState enum in src/DiceEngine.Domain/Entities/Enemy.cs
+- [X] T012 Create CombatEncounter entity (aggregate root) in src/DiceEngine.Domain/Entities/CombatEncounter.cs
+- [X] T013 [P] Create Combatant entity in src/DiceEngine.Domain/Entities/Combatant.cs
+- [X] T014 [P] Create Enemy entity (aggregate root) in src/DiceEngine.Domain/Entities/Enemy.cs
+- [X] T015 [P] Create AttackAction record (value object) in src/DiceEngine.Domain/ValueObjects/AttackAction.cs
+- [X] T016 [P] Create InitiativeEntry record (value object) in src/DiceEngine.Domain/ValueObjects/InitiativeEntry.cs
+- [X] T017 [P] Create CombatOutcome value object in src/DiceEngine.Domain/ValueObjects/CombatOutcome.cs
 
 ### Repository Layer
 
