@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: rgb(249 250 251);
+    color: rgb(17 24 39);
+  }
+
+  /* Ensure consistent focus indicators for accessibility */
+  :focus-visible {
+    outline: 2px solid rgb(37 99 235);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Button base styles */
+  .btn-primary {
+    padding: 0.5rem 1rem;
+    background-color: rgb(37 99 235);
+    color: rgb(255 255 255);
+    border-radius: 0.5rem;
+    transition-property: background-color;
+  }
+
+  .btn-primary:hover {
+    background-color: rgb(29 78 216);
+  }
+
+  .btn-primary:focus {
+    outline: none;
+    box-shadow:
+      0 0 0 2px rgb(255 255 255),
+      0 0 0 4px rgb(59 130 246);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    padding: 0.5rem 1rem;
+    border: 1px solid rgb(209 213 219);
+    border-radius: 0.5rem;
+    transition-property: background-color;
+  }
+
+  .btn-secondary:hover {
+    background-color: rgb(243 244 246);
+  }
+
+  .btn-secondary:focus {
+    outline: none;
+    box-shadow:
+      0 0 0 2px rgb(255 255 255),
+      0 0 0 4px rgb(107 114 128);
+  }
+
+  .btn-danger {
+    padding: 0.5rem 1rem;
+    background-color: rgb(220 38 38);
+    color: rgb(255 255 255);
+    border-radius: 0.5rem;
+    transition-property: background-color;
+  }
+
+  .btn-danger:hover {
+    background-color: rgb(185 28 28);
+  }
+
+  .btn-danger:focus {
+    outline: none;
+    box-shadow:
+      0 0 0 2px rgb(255 255 255),
+      0 0 0 4px rgb(239 68 68);
+  }
+}

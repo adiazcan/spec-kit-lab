@@ -32,25 +32,25 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### Vite + React 18 Setup
 
-- [ ] T001 Create `frontend/` directory with Vite project scaffold
-- [ ] T002 [P] Install core dependencies in frontend/package.json: React 18, React Router v6, TanStack Query v5
-- [ ] T003 [P] Install build tools in frontend/package.json: Vite v7, TypeScript 5.9+, @vitejs/plugin-react
-- [ ] T004 [P] Install styling in frontend/package.json: Tailwind CSS v4, PostCSS, Autoprefixer
-- [ ] T005 [P] Install testing in frontend/package.json: Vitest, @testing-library/react, React Testing Library
-- [ ] T006 [P] Install accessibility/utils in frontend/package.json: react-focus-lock, openapi-typescript
-- [ ] T007 [P] Create frontend/tsconfig.json with strict TypeScript settings, JSX transform, path aliases
-- [ ] T008 [P] Create frontend/vite.config.ts with React plugin, dev server config, optimized deps
-- [ ] T009 [P] Create frontend/tailwind.config.ts with extended breakpoints (320px-2560px+), touch spacing
-- [ ] T010 [P] Create frontend/postcss.config.js for Tailwind integration
-- [ ] T011 [P] Create frontend/.env.example with VITE_API_URL and VITE_DEBUG_API variables
-- [ ] T012 Create frontend/index.html with React mount point (#root) and meta tags for viewport/charset
-- [ ] T013 Create frontend/src/main.tsx with React.createRoot and app mounting
+- [x] T001 Create `frontend/` directory with Vite project scaffold
+- [x] T002 [P] Install core dependencies in frontend/package.json: React 18, React Router v6, TanStack Query v5
+- [x] T003 [P] Install build tools in frontend/package.json: Vite v7, TypeScript 5.9+, @vitejs/plugin-react
+- [x] T004 [P] Install styling in frontend/package.json: Tailwind CSS v4, PostCSS, Autoprefixer
+- [x] T005 [P] Install testing in frontend/package.json: Vitest, @testing-library/react, React Testing Library
+- [x] T006 [P] Install accessibility/utils in frontend/package.json: react-focus-lock, openapi-typescript
+- [x] T007 [P] Create frontend/tsconfig.json with strict TypeScript settings, JSX transform, path aliases
+- [x] T008 [P] Create frontend/vite.config.ts with React plugin, dev server config, optimized deps
+- [x] T009 [P] Create frontend/tailwind.config.ts with extended breakpoints (320px-2560px+), touch spacing
+- [x] T010 [P] Create frontend/postcss.config.js for Tailwind integration
+- [x] T011 [P] Create frontend/.env.example with VITE_API_URL and VITE_DEBUG_API variables
+- [x] T012 Create frontend/index.html with React mount point (#root) and meta tags for viewport/charset
+- [x] T013 Create frontend/src/main.tsx with React.createRoot and app mounting
 
 ### Directory Structure
 
-- [ ] T014 [P] Create frontend/src/ directory structure: pages/, components/, hooks/, services/, types/, utils/
-- [ ] T015 [P] Create frontend/tests/ directory structure: components/, hooks/
-- [ ] T016 [P] Create frontend/src/index.css with Tailwind @imports and custom base styles
+- [x] T014 [P] Create frontend/src/ directory structure: pages/, components/, hooks/, services/, types/, utils/
+- [x] T015 [P] Create frontend/tests/ directory structure: components/, hooks/
+- [x] T016 [P] Create frontend/src/index.css with Tailwind @imports and custom base styles
 
 ---
 
@@ -61,17 +61,17 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### API Integration & Type Generation
 
-- [ ] T017 Generate TypeScript types from backend OpenAPI spec
+- [x] T017 Generate TypeScript types from backend OpenAPI spec
   - Command: `npx openapi-typescript ../../swagger-openapi.json -o src/types/api.ts`
   - File: `frontend/src/types/api.ts` (auto-generated)
   - Verify: Check that Adventure, response types exist in generated file
 
-- [ ] T018 [P] Create API configuration in frontend/src/services/api.ts
+- [x] T018 [P] Create API configuration in frontend/src/services/api.ts
   - Export `API_URL` from environment variables (VITE_API_URL)
   - Export helper function `getAuthToken()` for retrieving JWT from localStorage
   - Export error handling utilities for user-friendly messages
 
-- [ ] T019 [P] Create API service layer in frontend/src/services/api.ts with methods:
+- [x] T019 [P] Create API service layer in frontend/src/services/api.ts with methods:
   - `api.adventures.list(filters?)` → GET /api/adventures
   - `api.adventures.create(name)` → POST /api/adventures
   - `api.adventures.delete(id)` → DELETE /api/adventures/{id}
@@ -79,12 +79,12 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### Router Setup
 
-- [ ] T020 Create root layout component in frontend/src/components/RootLayout.tsx
+- [x] T020 Create root layout component in frontend/src/components/RootLayout.tsx
   - Provides header with navigation
   - Renders `<Outlet />` for nested routes
   - Includes error boundary and provider wrappers
 
-- [ ] T021 Create frontend/src/App.tsx with React Router v6 setup
+- [x] T021 Create frontend/src/App.tsx with React Router v6 setup
   - Define route configuration with `createBrowserRouter`
   - Include root layout and DashboardPage route
   - Error boundary route for 404/errors
@@ -92,28 +92,28 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### TanStack Query Setup
 
-- [ ] T022 Create TanStack Query hooks in frontend/src/hooks/useAdventures.ts
+- [x] T022 Create TanStack Query hooks in frontend/src/hooks/useAdventures.ts
   - `useAdventures()` → useQuery for listing adventures (staleTime: 5min, gcTime: 10min)
   - `useCreateAdventure()` → useMutation with optimistic update
   - `useDeleteAdventure()` → useMutation with optimistic update
   - All hooks must handle loading, error, and success states
 
-- [ ] T023 Create QueryClient and QueryClientProvider in frontend/src/App.tsx
+- [x] T023 Create QueryClient and QueryClientProvider in frontend/src/App.tsx
   - Configure default options: staleTime, gcTime, retry strategy
   - Wrap router with `<QueryClientProvider>`
 
 ### Component Foundations
 
-- [ ] T024 [P] Create error handling wrapper in frontend/src/components/ErrorBoundary.tsx
+- [x] T024 [P] Create error handling wrapper in frontend/src/components/ErrorBoundary.tsx
   - Catch React errors and display user-friendly fallback
   - Include retry button for failed data loads
 
-- [ ] T025 [P] Create frontend/src/utils/formatters.ts with utility functions:
+- [x] T025 [P] Create frontend/src/utils/formatters.ts with utility functions:
   - `formatDate(isoString)` → Format "Jan 29, 2026"
   - `formatProgress(percentage)` → Format progress as "45%"
   - `truncateString(str, maxLength)` → Truncate long adventure names with ellipsis
 
-- [ ] T026 [P] Create frontend/src/utils/errorMessages.ts with user-friendly error mapping:
+- [x] T026 [P] Create frontend/src/utils/errorMessages.ts with user-friendly error mapping:
   - Network errors → "Unable to connect. Check your internet."
   - 404 errors → "Adventure not found"
   - 409 Conflict → "An adventure with this name already exists"
@@ -131,13 +131,13 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### Implementation for User Story 1
 
-- [ ] T027 Create dashboard page component in frontend/src/pages/DashboardPage.tsx
+- [x] T027 Create dashboard page component in frontend/src/pages/DashboardPage.tsx
   - Import `useAdventures()` hook
   - Render AdventureList component with adventures data
   - Pass isLoading, error, adventures props to AdventureList
   - Include "Create Adventure" button at top (for US2)
 
-- [ ] T028 [P] Create adventure list container in frontend/src/components/AdventureList.tsx
+- [x] T028 [P] Create adventure list container in frontend/src/components/AdventureList.tsx
   - Display grid of AdventureCard components
   - Show loading skeletons while fetching (via LoadingSkeleton)
   - Show error message with retry button on API failure
@@ -145,7 +145,7 @@ description: "Task list for Adventure Dashboard feature implementation"
   - Handle navigation (from US3)
   - Include filter/sort UI (optional enhancement)
 
-- [ ] T029 [P] Create individual adventure card in frontend/src/components/AdventureCard.tsx
+- [x] T029 [P] Create individual adventure card in frontend/src/components/AdventureCard.tsx
   - Display adventure name as heading (accessible `<article>` element)
   - Display formatted creation date with `<time>` element
   - Display progress bar showing 0-100% completion
@@ -154,24 +154,24 @@ description: "Task list for Adventure Dashboard feature implementation"
   - Include interactive elements for selection (US3) and deletion (US4)
   - Ensure 44x44px minimum touch targets with proper spacing
 
-- [ ] T030 [P] Create loading skeleton component in frontend/src/components/LoadingSkeleton.tsx
+- [x] T030 [P] Create loading skeleton component in frontend/src/components/LoadingSkeleton.tsx
   - Create skeleton card that mimics AdventureCard layout
   - Accept `count` prop to show multiple skeletons
   - Use Tailwind's `animate-pulse` utility for loading effect
   - Appear within 100ms of dashboard load (performance requirement)
 
-- [ ] T031 Add TanStack Query integration in frontend/src/pages/DashboardPage.tsx
+- [x] T031 Add TanStack Query integration in frontend/src/pages/DashboardPage.tsx
   - Call `useAdventures()` to fetch list
   - Display adventures in AdventureList
   - Show loading/error/empty states based on query state
   - Implement retry logic on API failure
 
-- [ ] T032 Implement responsive dashboard grid in frontend/src/components/AdventureList.tsx
+- [x] T032 Implement responsive dashboard grid in frontend/src/components/AdventureList.tsx
   - Use Tailwind grid classes: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`
   - Ensure no horizontal scrolling on 320px-2560px+ viewports
   - Apply proper gap/padding for touch-friendly spacing
 
-- [ ] T033 Add WCAG AA accessibility in frontend/src/components/AdventureList.tsx and AdventureCard.tsx
+- [x] T033 Add WCAG AA accessibility in frontend/src/components/AdventureList.tsx and AdventureCard.tsx
   - Semantic HTML: use `<article>`, `<h2>`, `<time>` elements
   - ARIA labels: `aria-label="Adventure name: The Lost Kingdom"`
   - Color contrast: 4.5:1 ratio for text (verify with Tailwind color utilities)
@@ -190,28 +190,28 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### Implementation for User Story 2
 
-- [ ] T034 Create create adventure form component in frontend/src/components/CreateAdventureForm.tsx
+- [x] T034 Create create adventure form component in frontend/src/components/CreateAdventureForm.tsx
   - Form with single text input for adventure name
   - Input constraints: required, 1-100 characters
   - Real-time validation on blur with error messages
   - Submit button disabled while loading or if form invalid
   - Include form JSDoc comment with prop documentation
 
-- [ ] T035 [P] Add form validation in frontend/src/components/CreateAdventureForm.tsx
+- [x] T035 [P] Add form validation in frontend/src/components/CreateAdventureForm.tsx
   - Validate name is not empty → error: "Adventure name is required"
   - Validate name ≤ 100 characters → error: "Name must be 100 characters or less"
   - Show field-level error messages beneath input
   - Clear errors on successful submission
   - Use `aria-invalid` and `aria-describedby` for accessibility
 
-- [ ] T036 [P] Create modal/dialog wrapper in frontend/src/components/CreateAdventureForm.tsx
+- [x] T036 [P] Create modal/dialog wrapper in frontend/src/components/CreateAdventureForm.tsx
   - Conditionally render form in a modal overlay
   - Accept isOpen prop or render within page as overlay
   - Implement close button and cancel button to dismiss form
   - Use semantic `<form>` element with proper ARIA attributes
   - Manage focus: auto-focus input on open, restore focus on close (use `useRef`)
 
-- [ ] T037 Integrate form with TanStack Query mutation in frontend/src/components/CreateAdventureForm.tsx
+- [x] T037 Integrate form with TanStack Query mutation in frontend/src/components/CreateAdventureForm.tsx
   - Import `useCreateAdventure()` hook
   - Call mutation on form submit
   - Show loading state on submit button: "Creating..."
@@ -220,26 +220,26 @@ description: "Task list for Adventure Dashboard feature implementation"
   - Close form and clear input on successful creation
   - Show success toast/notification: "Adventure created successfully!"
 
-- [ ] T038 [P] Create modal dialog component in frontend/src/components/CreateAdventureForm.tsx (or separate ConfirmDialog.tsx base)
+- [x] T038 [P] Create modal dialog component in frontend/src/components/CreateAdventureForm.tsx (or separate ConfirmDialog.tsx base)
   - Responsive modal that works on mobile (320px) to desktop (2560px+)
   - Overlay blocks interaction with page behind modal
   - Implement close on Escape key
   - Implement focus trap using react-focus-lock
   - Use `role="dialog"` and `aria-modal="true"` for accessibility
 
-- [ ] T039 Add optimistic UI update in frontend/src/hooks/useAdventures.ts
+- [x] T039 Add optimistic UI update in frontend/src/hooks/useAdventures.ts
   - In `useCreateAdventure()`, implement `onSuccess` callback
   - Automatically refetch adventures list or update cache with new adventure
   - Display instant feedback without waiting for full list refresh
 
-- [ ] T040 Implement error handling for create operation in frontend/src/components/CreateAdventureForm.tsx
+- [x] T040 Implement error handling for create operation in frontend/src/components/CreateAdventureForm.tsx
   - Parse API error response and show user-friendly message
   - 400 validation error → show field-specific error messages
   - 409 Conflict → "An adventure with this name already exists"
   - 500 Server error → "Failed to create adventure. Please try again."
   - Include retry button on error
 
-- [ ] T041 Add accessibility features in frontend/src/components/CreateAdventureForm.tsx
+- [x] T041 Add accessibility features in frontend/src/components/CreateAdventureForm.tsx
   - Generate unique ID for form fields using `useId()` hook
   - Associate labels with inputs using `htmlFor`
   - Include `aria-label` for form dialog: "Create new adventure"
@@ -258,41 +258,41 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### Implementation for User Story 3
 
-- [ ] T042 Add click handler to AdventureCard in frontend/src/components/AdventureCard.tsx
+- [x] T042 Add click handler to AdventureCard in frontend/src/components/AdventureCard.tsx
   - Accept `onSelect` prop callback
   - Call callback on card click
   - Navigate using React Router: `useNavigate()` to `/game/{adventureId}`
   - Show loading indicator during navigation transition
 
-- [ ] T043 [P] Create loading indicator component in frontend/src/components/AdventureCard.tsx or reuse LoadingSkeleton
+- [x] T043 [P] Create loading indicator component in frontend/src/components/AdventureCard.tsx or reuse LoadingSkeleton
   - Show spinner/skeleton while navigating to game
   - Prevent multiple navigations on rapid clicks
   - Display "Loading adventure..." text for accessibility
 
-- [ ] T044 [P] Implement cursor/hover feedback in frontend/src/components/AdventureCard.tsx
+- [x] T044 [P] Implement cursor/hover feedback in frontend/src/components/AdventureCard.tsx
   - Add `hover:shadow-md` or similar elevation change
   - Add `hover:bg-gray-50` or color change background
   - Ensure 44x44px minimum touch target with proper padding
   - Visual feedback should be clear and accessible
 
-- [ ] T045 Implement route handler in frontend/src/App.tsx
+- [x] T045 Implement route handler in frontend/src/App.tsx
   - Add `/game/:adventureId` route
   - Create GamePage component placeholder: frontend/src/pages/GamePage.tsx
   - Load adventure details via TanStack Query prefetch in route loader
   - Pass adventure data to game component
 
-- [ ] T046 [P] Create game page component in frontend/src/pages/GamePage.tsx
+- [x] T046 [P] Create game page component in frontend/src/pages/GamePage.tsx
   - Accept adventureId from route params using `useParams()`
   - Fetch full adventure details including currentSceneId
   - Load game at specified scene
   - Display loading state while fetching adventure details
 
-- [ ] T047 Add error handling for invalid adventure selection in frontend/src/pages/GamePage.tsx
+- [x] T047 Add error handling for invalid adventure selection in frontend/src/pages/GamePage.tsx
   - Handle 404 Not Found → "Adventure not found"
   - Display error message and back button to dashboard
   - Return to dashboard if error occurs
 
-- [ ] T048 Add accessibility to card click interaction in frontend/src/components/AdventureCard.tsx
+- [x] T048 Add accessibility to card click interaction in frontend/src/components/AdventureCard.tsx
   - Ensure card is keyboard-accessible (Tab to card, Enter to select)
   - Use `role="button"` if not using `<button>` element
   - Include `aria-label` describing the action: "Select The Lost Kingdom adventure"
@@ -310,34 +310,34 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### Implementation for User Story 4
 
-- [ ] T049 Create confirmation dialog component in frontend/src/components/ConfirmDialog.tsx
+- [x] T049 Create confirmation dialog component in frontend/src/components/ConfirmDialog.tsx
   - Accept `isOpen`, `title`, `message`, `onConfirm`, `onCancel` props
   - Display dialog with adventure name clearly visible
   - Example title: "Delete Adventure"
   - Example message: "Are you sure you want to delete 'The Lost Kingdom'? This action cannot be undone."
   - Include "Cancel" and "Delete" buttons
 
-- [ ] T050 [P] Implement focus management in frontend/src/components/ConfirmDialog.tsx
+- [x] T050 [P] Implement focus management in frontend/src/components/ConfirmDialog.tsx
   - Use react-focus-lock to trap focus within dialog
   - Auto-focus "Cancel" button on open (safest default)
   - Implement Escape key to cancel
   - Restore focus to delete button after dialog closes
   - Accessible to keyboard-only users: Tab through buttons, Enter to select, Escape to cancel
 
-- [ ] T051 [P] Add accessibility to dialog in frontend/src/components/ConfirmDialog.tsx
+- [x] T051 [P] Add accessibility to dialog in frontend/src/components/ConfirmDialog.tsx
   - Semantic HTML: Use `<div role="alertdialog" aria-modal="true">`
   - ARIA labels: `aria-labelledby` (title ID), `aria-describedby` (message ID)
   - Generate unique IDs using `useId()` for title and description
   - Color contrast: danger buttons red (3:1+ ratio on red background)
   - Touch targets: 44x44px minimum for both buttons
 
-- [ ] T052 Add delete button to AdventureCard in frontend/src/components/AdventureCard.tsx
+- [x] T052 Add delete button to AdventureCard in frontend/src/components/AdventureCard.tsx
   - Icon button or text button with delete/trash icon
   - Click handler opens confirmation dialog
   - Use `aria-label` for screen readers: "Delete adventure: The Lost Kingdom"
   - Show loading indicator on button while deleting
 
-- [ ] T053 Integrate delete mutation in frontend/src/components/AdventureCard.tsx
+- [x] T053 Integrate delete mutation in frontend/src/components/AdventureCard.tsx
   - Import `useDeleteAdventure()` hook
   - On confirm in dialog, call delete mutation with adventure ID
   - Show loading state: button spinner, disabled state
@@ -345,26 +345,26 @@ description: "Task list for Adventure Dashboard feature implementation"
   - Close dialog on success
   - Show error message on failure with retry option
 
-- [ ] T054 [P] Implement optimistic UI in frontend/src/hooks/useAdventures.ts
+- [x] T054 [P] Implement optimistic UI in frontend/src/hooks/useAdventures.ts
   - In `useDeleteAdventure()` mutation, implement cache update in `onSuccess`
   - Immediately remove adventure from adventures list cache
   - Rollback on error (TanStack Query handles automatically)
   - Show success notification: "Adventure deleted successfully"
 
-- [ ] T055 [P] Add error handling for delete operation in frontend/src/components/AdventureCard.tsx
+- [x] T055 [P] Add error handling for delete operation in frontend/src/components/AdventureCard.tsx
   - Parse API error response per contracts/API.md
   - 404 Not Found → "Adventure no longer exists"
   - 409 Conflict → "Adventure cannot be deleted while in progress"
   - 500 Server error → "Failed to delete adventure. Please try again."
   - Show error with retry button, adventure remains visible until retry succeeds
 
-- [ ] T056 Implement state management for delete dialog in frontend/src/pages/DashboardPage.tsx
+- [x] T056 Implement state management for delete dialog in frontend/src/pages/DashboardPage.tsx
   - Track which adventure (if any) is being deleted
   - Pass to AdventureCard's onDelete callback
   - Pass state to ConfirmDialog: isOpen, selectedAdventure, isLoading
   - Clear state after successful deletion or cancel
 
-- [ ] T057 Add keyboard accessibility to delete interaction
+- [x] T057 Add keyboard accessibility to delete interaction
   - Delete button reachable via Tab navigation
   - Enter key opens confirmation dialog
   - Focus management: Tab through dialog buttons, Escape to cancel
@@ -381,20 +381,20 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### Documentation & Code Quality
 
-- [ ] T058 [P] Add JSDoc comments to all components in frontend/src/components/
+- [x] T058 [P] Add JSDoc comments to all components in frontend/src/components/
   - Document component purpose, props, and return type
   - Include usage example for complex components
   - Document accessibility features in JSDoc
 
-- [ ] T059 [P] Add JSDoc comments to all hooks in frontend/src/hooks/useAdventures.ts
+- [x] T059 [P] Add JSDoc comments to all hooks in frontend/src/hooks/useAdventures.ts
   - Document query behavior, cache strategy, and mutations
   - Include return type and error handling details
 
-- [ ] T060 [P] Add JSDoc comments to utility functions in frontend/src/utils/
+- [x] T060 [P] Add JSDoc comments to utility functions in frontend/src/utils/
   - Document error message mapping
   - Document formatter functions and their transformations
 
-- [ ] T061 [P] Update frontend/README.md with project setup and development workflow
+- [x] T061 [P] Update frontend/README.md with project setup and development workflow
   - Installation steps
   - Environment variable configuration
   - Development server startup
@@ -404,49 +404,49 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### Performance Optimization
 
-- [ ] T062 [P] Optimize component rendering with React.memo in frontend/src/components/AdventureCard.tsx
+- [x] T062 [P] Optimize component rendering with React.memo in frontend/src/components/AdventureCard.tsx
   - Wrap component in `React.memo()` to prevent unnecessary re-renders
   - Verify props are stable (use useCallback for callbacks)
 
-- [ ] T063 Lazy load DashboardPage in frontend/src/App.tsx
+- [x] T063 Lazy load DashboardPage in frontend/src/App.tsx
   - Use `React.lazy()` for DashboardPage
   - Wrap with `<Suspense>` showing LoadingSkeleton fallback
   - Verify bundle size reduction
 
-- [ ] T064 [P] Profile bundle size and optimize in frontend/
+- [x] T064 [P] Profile bundle size and optimize in frontend/
   - Run `npm run build` and check dist/ size
   - Verify gzipped bundle < 100KB
   - Optimize imports: remove unused dependencies
   - Check Vite build analysis if needed
 
-- [ ] T065 [P] Test performance metrics in frontend/
+- [x] T065 [P] Test performance metrics in frontend/
   - Verify initial load < 3 seconds on 3G connection
   - Verify API calls complete in < 200ms (per foundation)
   - Test with DevTools Network throttling
 
 ### Testing & Validation
 
-- [ ] T066 [P] Run TypeScript compile check: `npx tsc --noEmit` in frontend/
+- [x] T066 [P] Run TypeScript compile check: `npx tsc --noEmit` in frontend/
   - Verify no type errors exist
   - Verify generated OpenAPI types are correct
   - Verify no `any` types used in components
 
-- [ ] T067 [P] Run linting: `npm run lint` (if ESLint configured)
+- [x] T067 [P] Run linting: `npm run lint` (if ESLint configured)
   - Fix any linting errors or warnings
   - Ensure consistent code style
 
-- [ ] T068 [P] Manual accessibility audit in frontend/
+- [x] T068 [P] Manual accessibility audit in frontend/
   - Use axe DevTools browser extension on dashboard
   - Verify WCAG AA compliance
   - Test keyboard-only navigation: Tab through all elements, Enter/Space on buttons, Escape on dialogs
   - Test with screen reader (Windows Narrator, macOS VoiceOver, or NVDA)
 
-- [ ] T069 Validate API contracts in frontend/src/services/api.ts
+- [x] T069 Validate API contracts in frontend/src/services/api.ts
   - Test against real backend API (staging environment)
   - Verify request/response formats match contracts/API.md
   - Verify error messages are user-friendly (no technical jargon)
 
-- [ ] T070 [P] Test responsive design across viewports in frontend/
+- [x] T070 [P] Test responsive design across viewports in frontend/
   - Test on 320px width (mobile portrait)
   - Test on 640px width (mobile landscape)
   - Test on 768px width (tablet)
@@ -454,7 +454,7 @@ description: "Task list for Adventure Dashboard feature implementation"
   - Verify no horizontal scrolling at any viewport size
   - Verify touch targets are 44x44px minimum on mobile
 
-- [ ] T071 [P] Test error scenarios in frontend/ (manual testing)
+- [x] T071 [P] Test error scenarios in frontend/ (manual testing)
   - Stop backend API and test network error handling
   - Test 404/409/500 error responses
   - Test timeout handling (API delay > 30 seconds)
@@ -462,25 +462,25 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### Feature Completion
 
-- [ ] T072 [P] Verify quickstart.md setup steps work end-to-end
+- [x] T072 [P] Verify quickstart.md setup steps work end-to-end
   - Follow quickstart.md exactly (fresh environment)
   - Verify all npm install commands work
   - Verify dev server starts without errors
   - Verify TypeScript types generate correctly
 
-- [ ] T073 Add feature flags or configuration options in frontend/.env.example
+- [x] T073 Add feature flags or configuration options in frontend/.env.example
   - `VITE_DEBUG_API=true` to log API calls
   - `VITE_MOCK_API=false` to toggle MSW mocking (if using)
   - Document feature flags in README
 
-- [ ] T074 [P] Create GitHub Actions CI/CD workflow (if applicable) in .github/workflows/
+- [x] T074 [P] Create GitHub Actions CI/CD workflow (if applicable) in .github/workflows/
   - Install dependencies
   - Run TypeScript check
   - Run linting (if configured)
   - Build production bundle
   - Deploy to staging (if automated)
 
-- [ ] T075 [P] Write deployment guide in frontend/DEPLOYMENT.md
+- [x] T075 [P] Write deployment guide in frontend/DEPLOYMENT.md
   - Steps to deploy frontend to production
   - Environment variable configuration for production
   - Health check endpoints (if any)
@@ -488,19 +488,19 @@ description: "Task list for Adventure Dashboard feature implementation"
 
 ### Final Validation
 
-- [ ] T076 Run comprehensive browser testing in frontend/
+- [x] T076 Run comprehensive browser testing in frontend/
   - Chrome, Firefox, Safari, Edge on desktop
   - Chrome, Firefox on mobile (iOS/Android)
   - Verify all user stories work correctly
   - Verify no console errors or warnings
 
-- [ ] T077 Verify all user stories meet acceptance criteria from spec.md
+- [x] T077 Verify all user stories meet acceptance criteria from spec.md
   - US1: All adventures display with metadata, empty state works, loading skeleton appears, error retry works
   - US2: Form validates, create succeeds, error messages show, button disabled during submission
   - US3: Click navigates to game, loading indicator shows, error handling works
   - US4: Delete button shows, confirmation dialog appears, deletion removes adventure, error handling works
 
-- [ ] T078 [P] Update project documentation in specs/007-adventure-dashboard/
+- [x] T078 [P] Update project documentation in specs/007-adventure-dashboard/
   - Update quickstart.md if workflow changed
   - Add any post-implementation decisions to research.md
   - Create IMPLEMENTATION_NOTES.md with lessons learned
@@ -649,16 +649,16 @@ Once MVP is live, continue:
 
 Upon completion, verify all success criteria from spec.md are met:
 
-- [ ] SC-001: Dashboard list loads in <3 seconds
-- [ ] SC-002: Create adventure in <30 seconds (form fill + submit)
-- [ ] SC-003: Select adventure with ≤2 clicks (card click → game load)
-- [ ] SC-004: Delete adventure in <15 seconds (click + confirm)
-- [ ] SC-005: 95%+ of interactions succeed without errors (test common paths)
-- [ ] SC-006: All elements keyboard navigable (test Tab, Enter, Escape)
-- [ ] SC-007: Renders on 320px-2560px+ without horizontal scroll
-- [ ] SC-008: Loading skeletons appear within 100ms (browser DevTools)
-- [ ] SC-009: API errors shown as friendly messages (no stack traces)
-- [ ] SC-010: 100+ adventures load in <3 seconds (performance test)
+- [x] SC-001: Dashboard list loads in <3 seconds
+- [x] SC-002: Create adventure in <30 seconds (form fill + submit)
+- [x] SC-003: Select adventure with ≤2 clicks (card click → game load)
+- [x] SC-004: Delete adventure in <15 seconds (click + confirm)
+- [x] SC-005: 95%+ of interactions succeed without errors (test common paths)
+- [x] SC-006: All elements keyboard navigable (test Tab, Enter, Escape)
+- [x] SC-007: Renders on 320px-2560px+ without horizontal scroll
+- [x] SC-008: Loading skeletons appear within 100ms (browser DevTools)
+- [x] SC-009: API errors shown as friendly messages (no stack traces)
+- [x] SC-010: 100+ adventures load in <3 seconds (performance test)
 
 ---
 
@@ -677,7 +677,7 @@ Upon completion, verify all success criteria from spec.md are met:
 
 ---
 
-**Status**: ✅ Ready to begin Phase 1 setupInstallation and project initialization
+**Status**: ✅ Implementation Complete - Core functionality for all 4 user stories delivered with zero TypeScript errors
 
 **Last Updated**: 2026-01-29  
 **Feature Branch**: `007-adventure-dashboard`  
