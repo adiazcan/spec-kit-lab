@@ -9,6 +9,9 @@ import RootLayout from "./components/RootLayout";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingSkeleton from "./components/LoadingSkeleton";
 import GamePage from "./pages/GamePage";
+import CharacterListPage from "./pages/CharacterListPage";
+import { CharacterCreatePage } from "./pages/CharacterCreatePage";
+import CharacterEditPage from "./pages/CharacterEditPage";
 
 // Lazy load DashboardPage to reduce initial bundle size
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
@@ -66,6 +69,18 @@ const router = createBrowserRouter([
       {
         path: "game/:adventureId",
         element: <GamePage />,
+      },
+      {
+        path: "game/:adventureId/characters",
+        element: <CharacterListPage />,
+      },
+      {
+        path: "game/:adventureId/character/create",
+        element: <CharacterCreatePage />,
+      },
+      {
+        path: "character/:characterId/edit",
+        element: <CharacterEditPage />,
       },
     ],
   },
