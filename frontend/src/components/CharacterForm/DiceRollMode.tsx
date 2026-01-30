@@ -1,3 +1,21 @@
+/**
+ * DiceRollMode Component
+ * T040: Dice rolling interface for D&D 5E attribute generation
+ *
+ * Features:
+ * - Roll 4d6 drop lowest for each attribute (D&D 5E standard)
+ * - Visual display of all four dice with dropped die clearly marked
+ * - Rolling animation for visual feedback
+ * - Re-roll individual attributes (not full reset of character)
+ * - Tracks which attributes have been rolled (completeness check)
+ * - Shows rolled values immediately in attribute section
+ * - Prevents form submission until all 5 attributes are rolled
+ * - Touch-friendly re-roll buttons (44x44px minimum)
+ * - Clear progress indication of remaining rolls needed
+ *
+ * @component
+ */
+
 import React from "react";
 import { useDiceRoll } from "@/hooks/useDiceRoll";
 import { ModifierDisplay } from "./ModifierDisplay";

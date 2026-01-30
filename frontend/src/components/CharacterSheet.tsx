@@ -1,3 +1,25 @@
+/**
+ * CharacterSheet Component
+ * T046-T048: Complete character display component with edit and delete actions
+ *
+ * Features:
+ * - Displays character name, creation date, and all attributes with modifiers
+ * - Shows each attribute value with calculated D&D 5E modifier (+2, -1, etc.)
+ * - Edit button to modify character attributes
+ * - Delete button with loading state during deletion
+ * - Responsive layout from mobile to desktop
+ * - Semantic HTML structure for screen reader accessibility
+ * - Print-friendly styles for tabletop reference
+ *
+ * Props:
+ * - character: Character - Character data to display (required)
+ * - onEdit: () => void - Callback when edit button clicked
+ * - onDelete: () => void - Callback when delete button clicked
+ * - isDeleting?: boolean - Whether delete operation is in progress
+ *
+ * @component
+ */
+
 import React from "react";
 import { AttributeSection } from "./CharacterSheet/AttributeSection";
 import type { Character } from "@/types/character";

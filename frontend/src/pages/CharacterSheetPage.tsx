@@ -258,3 +258,5 @@ export const CharacterSheetPage: React.FC = () => {
     </div>
   );
 };
+
+export default CharacterSheetPage;

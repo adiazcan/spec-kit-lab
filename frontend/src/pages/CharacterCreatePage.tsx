@@ -1,19 +1,21 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { CharacterForm } from "@/components/CharacterForm";
 import { useCreateCharacter } from "@/services/characterApi";
+import { ToastContainer, useToast } from "@/components/ToastContainer";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import type { CharacterFormData } from "@/types/character";
 
 /**
  * CharacterCreatePage - Page for creating a new character
  * T049-T051: CharacterCreatePage with API wiring and navigation
+ * T119: Toast notifications for success/error feedback
  *
  * Features:
  * - Renders CharacterForm in create mode
  * - Wired to useCreateCharacter mutation
  * - Navigates to character sheet on success
- * - Error handling and user feedback
+ * - Toast notifications for user feedback
  * - Gets adventureId from query params
  * - Back navigation support
  */
@@ -25,28 +27,25 @@ export const CharacterCreatePage: React.FC = () => {
   }>();
   const adventureId = paramAdventureId || searchParams.get("adventureId") || "";
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  const { toasts, showToast, dismissToast } = useToast();
   const { mutateAsync: createCharacter, isPending } = useCreateCharacter();
 
   /**
    * T050: Wire to useCreateCharacter mutation
    * T051: Navigate to character sheet on success
+   * T119: Show toast notifications for feedback
    */
   const handleSubmit = async (formData: CharacterFormData) => {
-    setErrorMessage(null);
-
     try {
       const character = await createCharacter(formData);
 
-      // Success! Navigate to character sheet
-      navigate(`/characters/${character.id}`, {
-        state: { message: "Character created successfully!" },
-      });
+      // Success! Show toast and navigate to character sheet
+      showToast("Character created successfully!", "success");
+      navigate(`/characters/${character.id}`);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to create character";
-      setErrorMessage(message);
+      showToast(message, "error");
       console.error("Character creation failed:", error);
     }
   };
@@ -87,6 +86,9 @@ export const CharacterCreatePage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* ToastContainer for notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
       {/* Page Header */}
       <div className="mb-6">
         <button
@@ -103,28 +105,6 @@ export const CharacterCreatePage: React.FC = () => {
           Design your character using point-buy or dice roll mode
         </p>
       </div>
-
-      {/* Error Message */}
-      {errorMessage && (
-        <div className="mb-6 max-w-4xl mx-auto">
-          <div
-            className="p-4 bg-red-50 border-2 border-red-200 rounded-lg"
-            role="alert"
-          >
-            <h3 className="text-lg font-semibold text-red-900 mb-1">
-              Creation Failed
-            </h3>
-            <p className="text-red-800">{errorMessage}</p>
-            <button
-              type="button"
-              onClick={() => setErrorMessage(null)}
-              className="mt-2 text-sm text-red-700 hover:text-red-900 underline"
-            >
-              Dismiss
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Loading Overlay */}
       {isPending && (
@@ -147,3 +127,5 @@ export const CharacterCreatePage: React.FC = () => {
     </div>
   );
 };
+
+export default CharacterCreatePage;

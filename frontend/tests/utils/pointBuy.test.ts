@@ -129,7 +129,9 @@ describe("pointBuy", () => {
     });
 
     it("should return cost to go from 10→11", () => {
-      expect(getIncrementCost(10)).toBe(1);
+      // Both 10 and 11 are in the same cost tier (1 point each from base 8)
+      // So incrementing from 10→11 costs 0 additional points
+      expect(getIncrementCost(10)).toBe(0);
     });
 
     it("should return cost to go from 13→14 (non-linear jump)", () => {

@@ -258,7 +258,7 @@ describe("diceRoller", () => {
 
     it("should return probability for maximum roll (18)", () => {
       const prob = getRollProbability(18);
-      expect(prob).toBeCloseTo(20 / 1296, 10);
+      expect(prob).toBeCloseTo(21 / 1296, 10);
     });
 
     it("should return highest probability for middle range", () => {

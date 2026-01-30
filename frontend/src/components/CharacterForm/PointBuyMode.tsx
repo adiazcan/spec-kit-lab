@@ -1,3 +1,27 @@
+/**
+ * PointBuyMode Component
+ * T039: Point-buy attribute allocation interface
+ *
+ * Features:
+ * - Visual attribute allocation using 27-point budget (D&D 5E standard)
+ * - Real-time point spending calculation and validation
+ * - Prevents overspending: validates budget constraint
+ * - Prevents out-of-range attributes (enforces 3-18 bounds)
+ * - Points remaining indicator with visual feedback
+ * - Attribute increment/decrement controls for each attribute
+ * - Clear visual feedback on budget status (green/red)
+ * - Responsive design for mobile to desktop
+ * - Accessible error messages for validation failures
+ *
+ * Props:
+ * - attributes: Attributes - Current attribute values
+ * - onAttributeChange: (key, value) => void - Called when attribute changes
+ * - pointsRemaining: number - Points left to allocate
+ * - errors?: Record<string, string> - Validation errors by field
+ *
+ * @component
+ */
+
 import React from "react";
 import { AttributeInput } from "./AttributeInput";
 import type { Attributes } from "@/types/character";

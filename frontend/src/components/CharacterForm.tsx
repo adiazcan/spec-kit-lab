@@ -1,3 +1,26 @@
+/**
+ * CharacterForm Component
+ * T041-T044: Main form component for creating or editing characters
+ *
+ * Features:
+ * - Create new character or edit existing character
+ * - Two creation modes: point-buy (27 points) and dice roll (4d6 drop lowest)
+ * - Real-time modifier calculation and display (<100ms)
+ * - Form validation (name required, attributes 3-18, mode-specific rules)
+ * - Mode switching with confirmation dialog to prevent data loss
+ * - Full keyboard accessibility (Tab navigation, Enter to submit, Escape to cancel)
+ * - Touch-friendly on mobile (44x44px minimum tap targets)
+ * - Responsive design (320px-2560px+)
+ *
+ * Props:
+ * - character?: Character - Existing character for edit mode (optional)
+ * - adventureId?: string - Adventure ID for create mode (required if no character)
+ * - onSubmit: (data) => Promise<void> - Callback when form is successfully submitted
+ * - onCancel: () => void - Callback when cancel button clicked
+ *
+ * @component
+ */
+
 import React, { useState, useEffect } from "react";
 import { useCharacterForm } from "@/hooks/useCharacterForm";
 import { PointBuyMode } from "./CharacterForm/PointBuyMode";

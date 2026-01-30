@@ -184,6 +184,7 @@ export function isValidRoll(roll: DiceRoll): boolean {
  */
 export function getRollProbability(target: number): number {
   // Pre-calculated from combinatorial analysis of all 6^4 = 1296 possibilities
+  // Verified to sum to 1.0 (all possible outcomes covered)
   const probabilities: Record<number, number> = {
     3: 1 / 1296, // 0.00077
     4: 4 / 1296, // 0.00309
@@ -200,7 +201,7 @@ export function getRollProbability(target: number): number {
     15: 131 / 1296, // 0.10108
     16: 94 / 1296, // 0.07251
     17: 54 / 1296, // 0.04167
-    18: 20 / 1296, // 0.01543
+    18: 21 / 1296, // 0.01620 (corrected from 20 to 21)
   };
 
   return probabilities[target] ?? 0;

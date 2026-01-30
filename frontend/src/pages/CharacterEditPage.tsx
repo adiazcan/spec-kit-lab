@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCharacter, useUpdateCharacter } from "@/services/characterApi";
 import { CharacterForm } from "@/components/CharacterForm";
+import { ToastContainer, useToast } from "@/components/ToastContainer";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 import type { CharacterFormData } from "@/types/character";
 
 /**
  * CharacterEditPage - Page for editing an existing character
  * T063-T064: Create CharacterEditPage with API integration for updates
+ * T119: Toast notifications for success/error feedback
  *
  * Features:
  * - Fetches character data via useCharacter query
@@ -15,15 +17,14 @@ import type { CharacterFormData } from "@/types/character";
  * - Handles loading, error, and not-found states
  * - Updates character via useUpdateCharacter mutation
  * - Navigates back to sheet on success
- * - Supports cancel (discard changes)
- * - Toast notifications for success/error
+ * - Toast notifications for user feedback
  * - Optimistic updates via React Query
  */
 export const CharacterEditPage: React.FC = () => {
   const navigate = useNavigate();
   const { characterId } = useParams<{ characterId: string }>();
 
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const { toasts, showToast, dismissToast } = useToast();
 
   /**
    * T064: Wire to useCharacter query for loading existing data
@@ -44,22 +45,20 @@ export const CharacterEditPage: React.FC = () => {
 
   /**
    * T061: Handle form submission (edit mode)
+   * T119: Show toast notifications for feedback
    */
   const handleSubmit = async (formData: CharacterFormData) => {
-    setSubmitError(null);
-
     try {
       // Update character via API
       await updateCharacter(formData);
 
-      // Navigate back to character sheet with success message
-      navigate(`/characters/${characterId}`, {
-        state: { message: "Character updated successfully" },
-      });
+      // Show toast and navigate back to character sheet
+      showToast("Character updated successfully", "success");
+      navigate(`/characters/${characterId}`);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to update character";
-      setSubmitError(errorMessage);
+      showToast(errorMessage, "error");
       console.error("Character update failed:", err);
     }
   };
@@ -198,6 +197,9 @@ export const CharacterEditPage: React.FC = () => {
   // Successfully loaded character - show edit form
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* ToastContainer for notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
       <div className="max-w-4xl mx-auto">
         {/* Breadcrumb navigation */}
         <nav className="mb-6 flex items-center text-sm text-gray-600">
@@ -217,19 +219,6 @@ export const CharacterEditPage: React.FC = () => {
           <span className="mx-2">/</span>
           <span className="text-gray-500">Edit</span>
         </nav>
-
-        {/* Submit error message */}
-        {submitError && (
-          <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
-            <p className="text-red-800 font-medium">{submitError}</p>
-            <button
-              onClick={() => setSubmitError(null)}
-              className="mt-2 text-sm text-red-600 hover:text-red-700 hover:underline"
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
 
         {/* Edit form - character prop enables edit mode */}
         <CharacterForm

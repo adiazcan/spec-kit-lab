@@ -1,3 +1,26 @@
+/**
+ * CharacterList Component
+ * T083: List view of all player characters with search, select, and delete
+ *
+ * Features:
+ * - Displays all characters with summary stats (name, top attributes, dates)
+ * - Search/filter functionality for managing 50+ characters
+ * - Click list item to view full character sheet
+ * - Delete button with confirmation dialog
+ * - Empty state message when no characters exist
+ * - Optimistic UI updates for delete operations
+ * - Responsive grid layout (mobile to desktop)
+ * - Fully accessible (keyboard navigation, screen readers)
+ * - Loading skeletons during data fetch
+ *
+ * Props:
+ * - characters: Character[] - List of characters to display
+ * - onDelete: (id) => void - Called when delete confirmed
+ * - isLoading?: boolean - Whether data is loading
+ *
+ * @component
+ */
+
 import React, { useState, useMemo } from "react";
 import { Character } from "../../types/character";
 import CharacterListItem from "./CharacterListItem";

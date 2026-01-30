@@ -226,34 +226,34 @@ date: "January 30, 2026"
 
 ### Documentation
 
-- [ ] T094 [P] Add JSDoc comments to all components in frontend/src/components/
-- [ ] T095 [P] Add JSDoc comments to all services in frontend/src/services/
-- [ ] T096 [P] Add JSDoc comments to all hooks in frontend/src/hooks/
-- [ ] T097 [P] Update README.md with character management feature documentation
+- [x] T094 [P] Add JSDoc comments to all components in frontend/src/components/
+- [x] T095 [P] Add JSDoc comments to all services in frontend/src/services/
+- [x] T096 [P] Add JSDoc comments to all hooks in frontend/src/hooks/
+- [x] T097 [P] Update README.md with character management feature documentation
 
 ### Performance Optimization
 
-- [ ] T098 Add React.memo() to AttributeInput component to prevent unnecessary re-renders
-- [ ] T099 Add React.memo() to CharacterListItem for list performance
-- [ ] T100 Configure React Query stale time and cache invalidation rules in frontend/src/services/characterApi.ts
-- [ ] T101 Add code splitting for character pages using React.lazy()
-- [ ] T102 Optimize bundle size - verify <100KB gzipped target met
+- [x] T098 Add React.memo() to AttributeInput component to prevent unnecessary re-renders
+- [x] T099 Add React.memo() to CharacterListItem for list performance
+- [x] T100 Configure React Query stale time and cache invalidation rules in frontend/src/services/characterApi.ts
+- [x] T101 Add code splitting for character pages using React.lazy()
+- [x] T102 Optimize bundle size - verify <100KB gzipped target met
 
 ### Accessibility Audit
 
-- [ ] T103 Run WCAG AA accessibility audit on CharacterForm
-- [ ] T104 Run WCAG AA accessibility audit on CharacterSheet
-- [ ] T105 Run WCAG AA accessibility audit on CharacterList
-- [ ] T106 Verify 4.5:1 color contrast ratios across all components
-- [ ] T107 Test keyboard-only navigation through entire character lifecycle
+- [x] T103 Run WCAG AA accessibility audit on CharacterForm
+- [x] T104 Run WCAG AA accessibility audit on CharacterSheet
+- [x] T105 Run WCAG AA accessibility audit on CharacterList
+- [x] T106 Verify 4.5:1 color contrast ratios across all components
+- [x] T107 Test keyboard-only navigation through entire character lifecycle
 - [ ] T108 Test screen reader compatibility for all interactive elements
 - [ ] T109 Verify touch targets are minimum 44x44px on mobile
 
 ### Testing & Quality
 
-- [ ] T110 Achieve >90% test coverage for attributeCalculator utility
-- [ ] T111 Achieve >90% test coverage for diceRoller utility
-- [ ] T112 Achieve >90% test coverage for point-buy validation
+- [x] T110 Achieve >90% test coverage for attributeCalculator utility
+- [x] T111 Achieve >90% test coverage for diceRoller utility
+- [x] T112 Achieve >90% test coverage for point-buy validation
 - [ ] T113 [P] Add E2E test for complete character creation flow (point-buy)
 - [ ] T114 [P] Add E2E test for complete character creation flow (dice roll)
 - [ ] T115 [P] Add E2E test for character editing flow
@@ -261,15 +261,15 @@ date: "January 30, 2026"
 
 ### Error Handling & User Experience
 
-- [ ] T117 Add user-friendly error messages for all API error responses
-- [ ] T118 Add loading indicators that appear after 500ms delay
-- [ ] T119 Add toast notifications for successful operations (create, update, delete)
-- [ ] T120 Add error boundary for graceful error recovery
-- [ ] T121 Add network error retry logic with exponential backoff
+- [x] T117 Add user-friendly error messages for all API error responses
+- [x] T118 Add loading indicators that appear after 500ms delay
+- [x] T119 Add toast notifications for successful operations (create, update, delete)
+- [x] T120 Add error boundary for graceful error recovery
+- [x] T121 Add network error retry logic with exponential backoff
 
 ### Validation & Constitution Compliance
 
-- [ ] T122 Verify no `any` types exist in TypeScript code (run `npm run type-check`)
+- [x] T122 Verify no `any` types exist in TypeScript code (run `npm run type-check`)
 - [ ] T123 Verify all modifier displays update within <100ms (performance testing)
 - [ ] T124 Verify initial page load is <3 seconds on 3G connection
 - [ ] T125 Verify API responses complete within <200ms target (P95)

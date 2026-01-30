@@ -5,10 +5,22 @@ import {
   useAdventureCharacters,
   useDeleteCharacter,
 } from "../services/characterApi";
+import { ToastContainer, useToast } from "../components/ToastContainer";
 import { Character } from "../types/character";
 
+/**
+ * CharacterListPage - Manage party members for an adventure
+ * T119: Toast notifications for delete operations
+ *
+ * Features:
+ * - Lists all characters in an adventure
+ * - Create new character button
+ * - Delete characters with confirmation
+ * - Toast notifications for feedback
+ */
 const CharacterListPage: React.FC = () => {
   const { adventureId } = useParams<{ adventureId: string }>();
+  const { toasts, showToast, dismissToast } = useToast();
 
   const {
     data: characters = [],
@@ -20,9 +32,14 @@ const CharacterListPage: React.FC = () => {
 
   const handleDelete = (id: string) => {
     deleteCharacter(id, {
+      onSuccess: () => {
+        showToast("Character deleted successfully", "success");
+      },
       onError: (err) => {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to delete character";
+        showToast(errorMessage, "error");
         console.error("Failed to delete character:", err);
-        alert("Failed to delete character. Please try again.");
       },
     });
   };
@@ -46,6 +63,9 @@ const CharacterListPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
+      {/* ToastContainer for notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Characters</h1>
