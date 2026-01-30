@@ -58,15 +58,57 @@ const mockDeleteCharacter = vi.fn(async (id: string) => {
   apiCharacters = apiCharacters.filter((c) => c.id !== id);
 });
 
+// Mock global fetch
+global.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+  const url = typeof input === "string" ? input : input.toString();
+
+  // Get adventure characters
+  if (
+    url.includes("/api/adventures/") &&
+    url.includes("/characters") &&
+    !init?.method
+  ) {
+    return new Response(JSON.stringify(apiCharacters), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // Delete character
+  if (url.includes("/api/characters/") && init?.method === "DELETE") {
+    const charId = url.split("/").pop();
+    mockDeleteCharacter(charId!);
+    return new Response("", {
+      status: 204,
+    });
+  }
+
+  const error = new Error("Not Found");
+  (error as any).status = 404;
+  return Promise.reject(error);
+}) as any;
+
 vi.mock("@/services/characterApi", () => ({
   useAdventureCharacters: (adventureId: string) => {
     if (!adventureId) {
-      return { data: [], isLoading: false, error: null };
+      return {
+        data: [],
+        isLoading: false,
+        error: null,
+        refetch: vi.fn(),
+        isError: false,
+        isFetching: false,
+        isSuccess: true,
+      };
     }
     return {
       data: apiCharacters,
       isLoading: false,
       error: null,
+      refetch: vi.fn(),
+      isError: false,
+      isFetching: false,
+      isSuccess: true,
     };
   },
   useDeleteCharacter: () => ({
@@ -77,6 +119,9 @@ vi.mock("@/services/characterApi", () => ({
         onError?.(err);
       }
     }),
+    isPending: false,
+    isError: false,
+    error: null,
   }),
 }));
 

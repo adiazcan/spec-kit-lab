@@ -56,16 +56,21 @@ describe("CharacterSheet (T034)", () => {
         />,
       );
 
-      expect(screen.getByText(/STR/i)).toBeInTheDocument();
-      expect(screen.getByText("10")).toBeInTheDocument();
-      expect(screen.getByText(/DEX/i)).toBeInTheDocument();
-      expect(screen.getByText("12")).toBeInTheDocument();
-      expect(screen.getByText(/INT/i)).toBeInTheDocument();
-      expect(screen.getByText("18")).toBeInTheDocument();
-      expect(screen.getByText(/CON/i)).toBeInTheDocument();
-      expect(screen.getByText("14")).toBeInTheDocument();
-      expect(screen.getByText(/CHA/i)).toBeInTheDocument();
-      expect(screen.getByText("16")).toBeInTheDocument();
+      // Use getAllByText for attribute abbreviations that may appear multiple times
+      expect(screen.getAllByText(/STR/i).length).toBeGreaterThan(0);
+      expect(screen.getByLabelText("Strength score").textContent).toBe("10");
+      expect(screen.getAllByText(/DEX/i).length).toBeGreaterThan(0);
+      expect(screen.getByLabelText("Dexterity score").textContent).toBe("12");
+      expect(screen.getAllByText(/INT/i).length).toBeGreaterThan(0);
+      expect(screen.getByLabelText("Intelligence score").textContent).toBe(
+        "18",
+      );
+      expect(screen.getAllByText(/CON/i).length).toBeGreaterThan(0);
+      expect(screen.getByLabelText("Constitution score").textContent).toBe(
+        "14",
+      );
+      expect(screen.getAllByText(/CHA/i).length).toBeGreaterThan(0);
+      expect(screen.getByLabelText("Charisma score").textContent).toBe("16");
     });
 
     it("should display all modifiers with correct formatting", () => {
@@ -94,7 +99,8 @@ describe("CharacterSheet (T034)", () => {
       );
 
       expect(screen.getByText(/created/i)).toBeInTheDocument();
-      expect(screen.getByText(/1\/30\/2026/)).toBeInTheDocument();
+      // Date is formatted as "January 30, 2026" not "1/30/2026"
+      expect(screen.getByText(/January 30, 2026/)).toBeInTheDocument();
     });
 
     it("should display negative modifiers correctly", () => {
