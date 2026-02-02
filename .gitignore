@@ -420,3 +420,10 @@ appsettings.Production.json
 *.msix
 *.msm
 *.msp
+
+# Frontend (Vite/Node)
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.env*
+.env*

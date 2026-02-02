@@ -1,3 +1,27 @@
+/**
+ * AdventureCard Component
+ * Individual adventure card with metadata and action buttons
+ *
+ * Features:
+ * - Displays adventure name, creation date, progress bar
+ * - Shows last played timestamp and current progress
+ * - Click to select adventure for gameplay
+ * - Delete button with loading state
+ * - Memoized to prevent unnecessary re-renders
+ * - Keyboard accessible (Enter/Space to select)
+ * - Supports missing backend fields with defaults
+ * - 44x44px minimum touch targets
+ *
+ * Props:
+ * - adventure: Adventure - Adventure data to display
+ * - isLoading?: boolean - Whether delete is in progress
+ * - onSelect: (adventure) => void - Callback when adventure selected
+ * - onDelete: (id) => void - Callback when delete clicked
+ *
+ * @component
+ * @memoized To prevent re-renders when parent updates
+ */
+
 import { memo } from "react";
 import type { Adventure } from "../services/api";
 import { formatDate, formatProgress } from "../utils/formatters";
