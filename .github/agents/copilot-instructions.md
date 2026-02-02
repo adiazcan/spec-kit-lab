@@ -14,6 +14,8 @@ Auto-generated from all feature plans. Last updated: 2026-01-27
 - Backend API (RESTful) - no local storage for adventure data; API URL via environment variables (007-adventure-dashboard)
 - TypeScript 5.9, React 18.3, Node.js 20 LTS + React Router v6, TanStack React Query v5, Tailwind CSS v4.1 (008-char-mgmt-ui)
 - Backend managed (PostgreSQL via .NET Entity Framework) (008-char-mgmt-ui)
+- TypeScript 5.9 + React 18.3.1 (ES2020) + React 18, React Router 6.30, React Query 5.90, Tailwind CSS 4.1, Vite 5.4 (010-inventory-ui)
+- N/A (state management via React Query, API calls to .NET backend) (010-inventory-ui)
 
 - C# with ASP.NET Core 10 + ASP.NET Core 10 Web API, Entity Framework Core, PostgreSQL (001-dice-engine)
 
@@ -33,9 +35,9 @@ tests/
 C# with ASP.NET Core 10: Follow standard conventions
 
 ## Recent Changes
+- 010-inventory-ui: Added TypeScript 5.9 + React 18.3.1 (ES2020) + React 18, React Router 6.30, React Query 5.90, Tailwind CSS 4.1, Vite 5.4
 - 009-main-game-ui: Added TypeScript 5.9, React 18.3, Node.js 20 LTS + React Router v6, TanStack React Query v5, Tailwind CSS v4.1
 - 008-char-mgmt-ui: Added TypeScript 5.9, React 18.3, Node.js 20 LTS + React Router v6, TanStack React Query v5, Tailwind CSS v4.1
-- 007-adventure-dashboard: Added TypeScript 5.x with React 18 (JSX/TSX syntax) + React 18, Vite, React Router v6, TanStack Query (React Query), Tailwind CSS, TypeScript, Vitest, React Testing Library
 
 
 <!-- MANUAL ADDITIONS START -->

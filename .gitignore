@@ -427,3 +427,7 @@ frontend/build/
 frontend/.vite/
 frontend/.env*
 .env*
+.DS_Store
+Thumbs.db
+*.swp
+.idea/

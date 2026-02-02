@@ -5,7 +5,7 @@
 **Status**: Draft  
 **Input**: User description: "Build an inventory management interface: Grid or list view of inventory items, Item details on hover/click, Drag-and-drop or button-based equip/unequip, Stack quantity display for stackable items, Equipment slots visualization, Use item functionality, Sort and filter options"
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - View Inventory Items in Grid or List Format (Priority: P1)
 
@@ -162,7 +162,7 @@ A player should see clear quantity indicators on stackable items showing current
 - What if the inventory contains thousands of items (extreme edge case) - does sort/filter performance degrade?
 - How does the UI handle items that belong in equipment slots but are not currently compatible with the character class/build?
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -262,7 +262,7 @@ A player should see clear quantity indicators on stackable items showing current
 
 - **EquipmentVisualization**: Represents the character's visual representation updated when equipment changes. Shows equipped items on character model/avatar.
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
