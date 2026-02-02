@@ -279,4 +279,32 @@
       0 0 0 2px rgb(255 255 255),
       0 0 0 4px rgb(239 68 68);
   }
+
+  /* HP bar smooth width transition */
+  .hp-bar {
+    transition: width 0.3s ease-out;
+  }
+
+  /* HP bar color transitions */
+  .hp-bar-green {
+    transition: background-color 0.3s ease-out;
+  }
+
+  .hp-bar-yellow {
+    transition: background-color 0.3s ease-out;
+  }
+
+  .hp-bar-red {
+    transition: background-color 0.3s ease-out;
+  }
+
+  /* Condition badge transitions */
+  .condition-badge {
+    transition: all 0.2s ease-out;
+  }
+
+  /* Health display container transitions */
+  .health-display {
+    transition: background-color 0.2s ease-out;
+  }
 }

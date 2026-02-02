@@ -21,14 +21,17 @@ import {
   useAdventure,
   useSubmitCommand,
   useCombat,
+  useResolveEnemyTurn,
 } from "../services/gameApi";
 import { useGameState } from "../hooks/useGameState";
 import { useGameplayDiceRoll } from "../hooks/useGameplayDiceRoll";
+import { useCombatState } from "../hooks/useCombatState";
 import { GameScreen } from "../components/GameScreen/GameScreen";
 import { CommandInput } from "../components/CommandInput/CommandInput";
 import { ActionButtons } from "../components/CommandInput/ActionButtons";
 import type { SceneData } from "../types/narrative";
 import type { CharacterStatus } from "../types/character";
+import type { CombatState } from "../types/game";
 
 /**
  * GamePage component - Main game interface entry point
@@ -70,9 +73,13 @@ export default function GamePage() {
   // Fetch adventure state (gets character ID from adventure)
   const adventureQuery = useAdventure(adventureId);
 
-  // Fetch combat state if in combat (use null for now as combatId comes from adventure state)
-  // TODO: Extract combatId from adventureQuery.data when available
-  const combatQuery = useCombat(null);
+  // Extract combatId from adventure state
+  // TODO: Update this when adventure DTO includes combatId
+  const combatId = (adventureQuery.data as any)?.combatId || null;
+
+  // Fetch combat state if in combat
+  // T074: Poll combat state every 2 seconds via React Query refetchInterval
+  const combatQuery = useCombat(combatId);
 
   // Game state management (narrative messages, UI state)
   const gameState = useGameState(adventureId);
@@ -80,8 +87,68 @@ export default function GamePage() {
   // Dice roll display management
   const diceRoll = useGameplayDiceRoll();
 
+  // Combat state helper hook
+  const { isPlayerTurn, isCombatActive } = useCombatState(
+    combatQuery.data as CombatState | null,
+  );
+
   // Command submission mutation hook
   const submitCommandMutation = useSubmitCommand(adventureId);
+
+  // Enemy turn resolution mutation
+  const resolveEnemyTurnMutation = useResolveEnemyTurn(combatId || "");
+
+  /**
+   * T075: Implement automatic enemy turn resolution after player turn completes
+   *
+   * When combat is active and it's the enemy's turn:
+   * 1. Wait for combat state to update
+   * 2. Automatically trigger enemy turn resolution
+   * 3. Update narrative with enemy action results
+   */
+  useEffect(() => {
+    if (
+      isCombatActive &&
+      !isPlayerTurn &&
+      !resolveEnemyTurnMutation.isPending &&
+      combatId
+    ) {
+      // Delay enemy turn resolution by 1 second for better UX
+      const timer = setTimeout(() => {
+        resolveEnemyTurnMutation
+          .mutateAsync()
+          .then((result: any) => {
+            // Add enemy action result to narrative
+            if (result?.message) {
+              gameState.addNarrativeMessage({
+                id: `msg-${Date.now()}-${Math.random()}`,
+                timestamp: new Date(),
+                type: "combat",
+                content: result.message,
+                metadata: result.metadata,
+              });
+            }
+          })
+          .catch((error: Error) => {
+            // Add error message to narrative
+            gameState.addNarrativeMessage({
+              id: `msg-${Date.now()}-${Math.random()}`,
+              timestamp: new Date(),
+              type: "system",
+              content: `Enemy turn failed: ${error.message}`,
+            });
+          });
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [
+    isCombatActive,
+    isPlayerTurn,
+    combatId,
+    resolveEnemyTurnMutation,
+    gameState,
+  ]);
 
   // Update loading state based on queries
   useEffect(() => {
@@ -248,6 +315,7 @@ export default function GamePage() {
         scene={sceneData}
         messages={gameState.narrativeMessages}
         character={characterStatus}
+        combat={(combatQuery.data as CombatState) || null}
         isLoading={gameState.uiState.isLoading}
         status={gameState.uiState.error || undefined}
         currentDiceRoll={diceRoll.currentRoll}

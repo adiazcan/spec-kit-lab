@@ -1,5 +1,6 @@
 /**
  * Game API Service Layer
+ * T082: Enhanced with performance monitoring for API response times
  *
  * Provides React Query hooks for all game-related API calls:
  * - useAdventure: Fetch adventure state
@@ -9,10 +10,12 @@
  * - useResolveEnemyTurn: Resolve enemy combat turn
  *
  * All hooks use React Query for caching and automatic refetching.
+ * Performance monitoring tracks response times and logs slow requests (>1000ms).
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { components } from "../types/api";
+import { withPerformanceTracking } from "../utils/performanceMonitor";
 
 // Extract types from generated API schema
 type AdventureDto = components["schemas"]["AdventureDto"];
@@ -43,14 +46,19 @@ export function useAdventure(adventureId: string) {
   return useQuery({
     queryKey: queryKeys.adventure(adventureId),
     queryFn: async () => {
-      const response = await fetch(`${API_BASE}/Adventures/${adventureId}`);
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error("Adventure not found");
-        }
-        throw new Error("Failed to fetch adventure");
-      }
-      return response.json() as Promise<AdventureDto>;
+      return withPerformanceTracking(
+        `GET /api/Adventures/${adventureId}`,
+        async () => {
+          const response = await fetch(`${API_BASE}/Adventures/${adventureId}`);
+          if (!response.ok) {
+            if (response.status === 404) {
+              throw new Error("Adventure not found");
+            }
+            throw new Error("Failed to fetch adventure");
+          }
+          return response.json() as Promise<AdventureDto>;
+        },
+      );
     },
     staleTime: 30000, // 30 seconds
     refetchInterval: 60000, // 60 seconds
@@ -71,14 +79,19 @@ export function useCharacter(characterId: string | null) {
     queryKey: queryKeys.character(characterId || ""),
     queryFn: async () => {
       if (!characterId) return null;
-      const response = await fetch(`${API_BASE}/characters/${characterId}`);
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error("Character not found");
-        }
-        throw new Error("Failed to fetch character");
-      }
-      return response.json() as Promise<CharacterDto>;
+      return withPerformanceTracking(
+        `GET /api/characters/${characterId}`,
+        async () => {
+          const response = await fetch(`${API_BASE}/characters/${characterId}`);
+          if (!response.ok) {
+            if (response.status === 404) {
+              throw new Error("Character not found");
+            }
+            throw new Error("Failed to fetch character");
+          }
+          return response.json() as Promise<CharacterDto>;
+        },
+      );
     },
     enabled: !!characterId,
     staleTime: 10000, // 10 seconds
@@ -100,14 +113,19 @@ export function useCombat(combatId: string | null) {
     queryKey: queryKeys.combat(combatId || ""),
     queryFn: async () => {
       if (!combatId) return null;
-      const response = await fetch(`${API_BASE}/Combats/${combatId}`);
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error("Combat not found");
-        }
-        throw new Error("Failed to fetch combat");
-      }
-      return response.json() as Promise<CombatStateResponse>;
+      return withPerformanceTracking(
+        `GET /api/Combats/${combatId}`,
+        async () => {
+          const response = await fetch(`${API_BASE}/Combats/${combatId}`);
+          if (!response.ok) {
+            if (response.status === 404) {
+              throw new Error("Combat not found");
+            }
+            throw new Error("Failed to fetch combat");
+          }
+          return response.json() as Promise<CombatStateResponse>;
+        },
+      );
     },
     enabled: !!combatId,
     staleTime: 5000, // 5 seconds

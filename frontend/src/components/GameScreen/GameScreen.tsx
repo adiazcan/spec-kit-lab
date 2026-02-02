@@ -3,8 +3,10 @@ import { SceneDescription } from "./SceneDescription";
 import { NarrativeDisplay } from "./NarrativeDisplay";
 import { CharacterStatusSidebar } from "../CharacterStatus/CharacterStatusSidebar";
 import { DiceRollAnimation } from "../DiceRoll/DiceRollAnimation";
+import { CombatOverlay } from "../CombatUI/CombatOverlay";
 import type { SceneData, NarrativeMessage } from "../../types/narrative";
 import type { DiceRollResult } from "../../types/game";
+import type { CombatState } from "../../types/combat";
 import type { CharacterStatus } from "../../types/character";
 
 /**
@@ -16,6 +18,7 @@ import type { CharacterStatus } from "../../types/character";
  * - Middle/Left: Narrative display (scrollable text area)
  * - Right: Character status sidebar
  * - Overlay: Dice roll animation (when active)
+ * - Combat: Combat UI overlay (when in combat)
  *
  * @component
  */
@@ -28,6 +31,9 @@ interface GameScreenProps {
 
   /** Active character status */
   character: CharacterStatus | null;
+
+  /** Current combat state (null if not in combat) */
+  combat: CombatState | null;
 
   /** Whether data is currently loading */
   isLoading: boolean;
@@ -46,11 +52,14 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   scene,
   messages,
   character,
+  combat,
   isLoading,
   status,
   currentDiceRoll,
   onDiceRollComplete,
 }) => {
+  const isCombatActive = combat?.status === "active";
+
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
       {/* Scene Description - Top Section */}
@@ -69,20 +78,30 @@ export const GameScreen: React.FC<GameScreenProps> = ({
 
       {/* Main Game Area - Story + Status */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: Narrative Display */}
-        <div className="flex-1 overflow-hidden border-r border-gray-700 relative">
-          <NarrativeDisplay isLoading={isLoading} messages={messages} />
-
-          {/* Dice Roll Animation Overlay */}
-          {currentDiceRoll && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-60 rounded-lg">
-              <DiceRollAnimation
-                roll={currentDiceRoll}
-                onAnimationComplete={onDiceRollComplete}
-                className="max-w-md"
-              />
+        {/* Left: Narrative Display + Combat UI */}
+        <div className="flex-1 overflow-hidden border-r border-gray-700 relative flex flex-col">
+          {/* Combat UI Overlay (visible only when combat is active) */}
+          {isCombatActive && combat && (
+            <div className="flex-shrink-0 p-4 border-b border-gray-700">
+              <CombatOverlay combat={combat} />
             </div>
           )}
+
+          {/* Narrative Display */}
+          <div className="flex-1 overflow-hidden relative">
+            <NarrativeDisplay isLoading={isLoading} messages={messages} />
+
+            {/* Dice Roll Animation Overlay */}
+            {currentDiceRoll && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-60 rounded-lg">
+                <DiceRollAnimation
+                  roll={currentDiceRoll}
+                  onAnimationComplete={onDiceRollComplete}
+                  className="max-w-md"
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right: Character Status Sidebar */}

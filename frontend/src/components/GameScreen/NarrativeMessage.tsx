@@ -1,10 +1,13 @@
-import React from "react";
+import React, { memo } from "react";
 import type { NarrativeMessage as NarrativeMessageType } from "../../types/narrative";
 import { formatDiceRoll, checkCritical } from "../../utils/diceAnimationHelper";
 
 /**
  * NarrativeMessage component displays a single narrative message.
- * styling and icons are determined by message type.
+ * T081: Optimized with React.memo to prevent unnecessary re-renders
+ *
+ * The component re-renders only when the message object changes, improving
+ * performance when displaying large numbers of narrative messages (500+).
  *
  * Message type colors:
  * - scene: Amber (location/transition)
@@ -17,7 +20,32 @@ import { formatDiceRoll, checkCritical } from "../../utils/diceAnimationHelper";
  * Supports rich metadata display including dice roll results with
  * critical success/failure indicators.
  *
+ * Features:
+ * - Memoized for optimal performance with virtual scrolling
+ * - Type-specific styling and icons
+ * - Dice roll metadata with critical indicators
+ * - Speaker attribution for dialogue messages
+ * - Formatted timestamps
+ * - Smooth fade-in animation via CSS classes
+ *
  * @component
+ * @param {Object} props - Component props
+ * @param {NarrativeMessage} props.message - The narrative message to display
+ * @example
+ * ```tsx
+ * const message: NarrativeMessage = {
+ *   id: '1',
+ *   timestamp: new Date(),
+ *   type: 'action',
+ *   content: 'You strike the goblin!',
+ *   metadata: {
+ *     diceRoll: { ... },
+ *     speaker: 'Game Narrator'
+ *   }
+ * };
+ *
+ * <NarrativeMessage message={message} />
+ * ```
  */
 interface NarrativeMessageItemProps {
   message: NarrativeMessageType;
@@ -88,63 +116,75 @@ const formatTimestamp = (date: Date): string => {
   });
 };
 
-export const NarrativeMessage: React.FC<NarrativeMessageItemProps> = ({
-  message,
-}) => {
-  const diceRoll = message.metadata?.diceRoll;
-  const critical = diceRoll ? checkCritical(diceRoll) : null;
+export const NarrativeMessage: React.FC<NarrativeMessageItemProps> = memo(
+  ({ message }) => {
+    const diceRoll = message.metadata?.diceRoll;
+    const critical = diceRoll ? checkCritical(diceRoll) : null;
 
-  return (
-    <div
-      className={`narrative-message p-3 my-2 rounded ${getMessageStyles(message.type)}`}
-    >
-      <div className="flex gap-2">
-        <span className="text-lg flex-shrink-0">
-          {getMessageIcon(message.type)}
-        </span>
-        <div className="flex-1">
-          <p className={`text-xs text-gray-400 mb-1`}>
-            {formatTimestamp(message.timestamp)}
-          </p>
-          <p
-            className={`${getTextColor(message.type)} whitespace-pre-wrap text-sm leading-relaxed`}
-          >
-            {message.content}
-          </p>
-
-          {/* Dice roll metadata display */}
-          {diceRoll && (
-            <div
-              className={`
-                mt-2
-                pt-2
-                border-t
-                border-current
-                border-opacity-20
-                text-xs
-                font-mono
-                ${critical === "success" ? "text-green-300" : critical === "failure" ? "text-red-300" : "text-gray-300"}
-              `}
-            >
-              <div className="font-semibold mb-1">
-                {diceRoll.context || "Roll"}
-              </div>
-              <div>{formatDiceRoll(diceRoll)}</div>
-              {critical && (
-                <div className="mt-1 font-bold uppercase">
-                  {critical === "success" ? "✨ CRITICAL!" : "⚠️ CRITICAL FAIL"}
-                </div>
-              )}
-            </div>
-          )}
-
-          {message.metadata?.speaker && (
-            <p className="text-xs text-gray-500 mt-1">
-              — {message.metadata.speaker}
+    return (
+      <div
+        className={`narrative-message p-3 my-2 rounded ${getMessageStyles(message.type)}`}
+      >
+        <div className="flex gap-2">
+          <span className="text-lg flex-shrink-0">
+            {getMessageIcon(message.type)}
+          </span>
+          <div className="flex-1">
+            <p className={`text-xs text-gray-400 mb-1`}>
+              {formatTimestamp(message.timestamp)}
             </p>
-          )}
+            <p
+              className={`${getTextColor(message.type)} whitespace-pre-wrap text-sm leading-relaxed`}
+            >
+              {message.content}
+            </p>
+
+            {/* Dice roll metadata display */}
+            {diceRoll && (
+              <div
+                className={`
+                  mt-2
+                  pt-2
+                  border-t
+                  border-current
+                  border-opacity-20
+                  text-xs
+                  font-mono
+                  ${critical === "success" ? "text-green-300" : critical === "failure" ? "text-red-300" : "text-gray-300"}
+                `}
+              >
+                <div className="font-semibold mb-1">
+                  {diceRoll.context || "Roll"}
+                </div>
+                <div>{formatDiceRoll(diceRoll)}</div>
+                {critical && (
+                  <div className="mt-1 font-bold uppercase">
+                    {critical === "success"
+                      ? "✨ CRITICAL!"
+                      : "⚠️ CRITICAL FAIL"}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {message.metadata?.speaker && (
+              <p className="text-xs text-gray-500 mt-1">
+                — {message.metadata.speaker}
+              </p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison: only re-render if message content changed
+    return (
+      prevProps.message.id === nextProps.message.id &&
+      prevProps.message.content === nextProps.message.content &&
+      prevProps.message.type === nextProps.message.type &&
+      JSON.stringify(prevProps.message.metadata) ===
+        JSON.stringify(nextProps.message.metadata)
+    );
+  },
+);

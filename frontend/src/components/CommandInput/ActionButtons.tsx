@@ -53,10 +53,7 @@ interface ActionButtonsProps {
    * @param action - The action that was submitted (attack, flee, useitem)
    * @param result - The server response from the action
    */
-  onActionSubmitted?: (
-    action: string,
-    result: Record<string, unknown>,
-  ) => void;
+  onActionSubmitted?: (action: string, result: Record<string, unknown>) => void;
 
   /**
    * Callback when an action fails
@@ -104,14 +101,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     combatState &&
     character &&
     combatState.combatants &&
-    combatState.combatants[combatState.currentTurnIndex]?.id === character.characterId;
+    combatState.combatants[combatState.currentTurnIndex]?.id ===
+      character.characterId;
 
   // Determine if buttons should be disabled
   const isDisabled =
-    disabled ||
-    !combatState ||
-    !isPlayerTurn ||
-    resolveTurnMutation.isPending;
+    disabled || !combatState || !isPlayerTurn || resolveTurnMutation.isPending;
 
   /**
    * Handle Attack button click
@@ -120,7 +115,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   const handleAttack = useCallback(() => {
     if (!combatState || !character) return;
 
-    const currentCombatant = combatState.combatants?.[combatState.currentTurnIndex];
+    const currentCombatant =
+      combatState.combatants?.[combatState.currentTurnIndex];
     const targetCombatant = combatState.combatants?.find(
       (c) => c.id !== character.characterId && c.status !== "defeated",
     );
@@ -148,7 +144,13 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         },
       },
     );
-  }, [combatState, character, resolveTurnMutation, onActionSubmitted, onActionError]);
+  }, [
+    combatState,
+    character,
+    resolveTurnMutation,
+    onActionSubmitted,
+    onActionError,
+  ]);
 
   /**
    * Handle Flee button click
@@ -157,7 +159,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   const handleFlee = useCallback(() => {
     if (!combatState || !character) return;
 
-    const currentCombatant = combatState.combatants?.[combatState.currentTurnIndex];
+    const currentCombatant =
+      combatState.combatants?.[combatState.currentTurnIndex];
 
     if (!currentCombatant) {
       onActionError?.("Invalid combat state");
@@ -182,7 +185,13 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         },
       },
     );
-  }, [combatState, character, resolveTurnMutation, onActionSubmitted, onActionError]);
+  }, [
+    combatState,
+    character,
+    resolveTurnMutation,
+    onActionSubmitted,
+    onActionError,
+  ]);
 
   /**
    * Handle Use Item button click
@@ -192,7 +201,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   const handleUseItem = useCallback(() => {
     if (!combatState || !character) return;
 
-    const currentCombatant = combatState.combatants?.[combatState.currentTurnIndex];
+    const currentCombatant =
+      combatState.combatants?.[combatState.currentTurnIndex];
 
     if (!currentCombatant) {
       onActionError?.("Invalid combat state");
@@ -217,7 +227,13 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         },
       },
     );
-  }, [combatState, character, resolveTurnMutation, onActionSubmitted, onActionError]);
+  }, [
+    combatState,
+    character,
+    resolveTurnMutation,
+    onActionSubmitted,
+    onActionError,
+  ]);
 
   /**
    * Setup keyboard shortcuts: Alt+A, Alt+F, Alt+I
@@ -276,7 +292,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           active:scale-95 transition-transform
         "
         aria-label="Attack (Alt+A)"
-        title={isDisabled ? "Waiting for your turn" : "Attack the enemy (Alt+A)"}
+        title={
+          isDisabled ? "Waiting for your turn" : "Attack the enemy (Alt+A)"
+        }
         aria-pressed={false}
       >
         <span className="text-lg">⚔️</span>
@@ -301,7 +319,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           active:scale-95 transition-transform
         "
         aria-label="Flee (Alt+F)"
-        title={isDisabled ? "Waiting for your turn" : "Flee from combat (Alt+F)"}
+        title={
+          isDisabled ? "Waiting for your turn" : "Flee from combat (Alt+F)"
+        }
         aria-pressed={false}
       >
         <span className="text-lg">🏃</span>
@@ -327,7 +347,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         "
         aria-label="Use Item (Alt+I)"
         title={
-          isDisabled ? "Waiting for your turn" : "Use an item from inventory (Alt+I)"
+          isDisabled
+            ? "Waiting for your turn"
+            : "Use an item from inventory (Alt+I)"
         }
         aria-pressed={false}
       >

@@ -177,21 +177,21 @@ description: "Implementation tasks for Main Game Interface feature"
 
 ### Implementation for User Story 6
 
-- [ ] T061 [P] [US6] Create CombatOverlay component in frontend/src/components/CombatUI/CombatOverlay.tsx as combat mode container
-- [ ] T062 [P] [US6] Create TurnIndicator component in frontend/src/components/CombatUI/TurnIndicator.tsx with turn banner (green for player, neutral for enemy)
-- [ ] T063 [P] [US6] Create RoundCounter component in frontend/src/components/CombatUI/RoundCounter.tsx to display current round number
-- [ ] T064 [P] [US6] Create CombatantsList component in frontend/src/components/CombatUI/CombatantsList.tsx to show all combatants in initiative order
-- [ ] T065 [P] [US6] Create useCombatState custom hook in frontend/src/hooks/useCombatState.ts to manage combat turn tracking and state
-- [ ] T066 [US6] Integrate TurnIndicator, RoundCounter, and CombatantsList into CombatOverlay layout
-- [ ] T067 [US6] Connect CombatOverlay to useCombat API hook to fetch and display combat state
-- [ ] T068 [US6] Add active turn highlighting in CombatantsList (green arrow indicator for current combatant)
-- [ ] T069 [US6] Add HP bar visualization for each combatant in CombatantsList with color coding (green >50%, yellow 25-50%, red <25%)
-- [ ] T070 [US6] Add defeated combatant visual treatment (strikethrough, gray color, move to bottom)
-- [ ] T071 [US6] Display active conditions as badges on each combatant with color coding (buff=green, debuff=red)
-- [ ] T072 [US6] Integrate CombatOverlay into GameScreen with conditional rendering (visible only when combat is active)
-- [ ] T073 [US6] Add ARIA live regions to TurnIndicator for screen reader turn announcements
-- [ ] T074 [US6] Poll combat state every 2 seconds via React Query refetchInterval to keep turn order current
-- [ ] T075 [US6] Implement automatic enemy turn resolution after player turn completes using useResolveEnemyTurn mutation
+- [x] T061 [P] [US6] Create CombatOverlay component in frontend/src/components/CombatUI/CombatOverlay.tsx as combat mode container
+- [x] T062 [P] [US6] Create TurnIndicator component in frontend/src/components/CombatUI/TurnIndicator.tsx with turn banner (green for player, neutral for enemy)
+- [x] T063 [P] [US6] Create RoundCounter component in frontend/src/components/CombatUI/RoundCounter.tsx to display current round number
+- [x] T064 [P] [US6] Create CombatantsList component in frontend/src/components/CombatUI/CombatantsList.tsx to show all combatants in initiative order
+- [x] T065 [P] [US6] Create useCombatState custom hook in frontend/src/hooks/useCombatState.ts to manage combat turn tracking and state
+- [x] T066 [US6] Integrate TurnIndicator, RoundCounter, and CombatantsList into CombatOverlay layout
+- [x] T067 [US6] Connect CombatOverlay to useCombat API hook to fetch and display combat state
+- [x] T068 [US6] Add active turn highlighting in CombatantsList (green arrow indicator for current combatant)
+- [x] T069 [US6] Add HP bar visualization for each combatant in CombatantsList with color coding (green >50%, yellow 25-50%, red <25%)
+- [x] T070 [US6] Add defeated combatant visual treatment (strikethrough, gray color, move to bottom)
+- [x] T071 [US6] Display active conditions as badges on each combatant with color coding (buff=green, debuff=red)
+- [x] T072 [US6] Integrate CombatOverlay into GameScreen with conditional rendering (visible only when combat is active)
+- [x] T073 [US6] Add ARIA live regions to TurnIndicator for screen reader turn announcements
+- [x] T074 [US6] Poll combat state every 2 seconds via React Query refetchInterval to keep turn order current
+- [x] T075 [US6] Implement automatic enemy turn resolution after player turn completes using useResolveEnemyTurn mutation
 
 **Checkpoint**: Combat UI is now fully functional - all user stories (1-6) are independently testable and integrated
 
@@ -201,19 +201,19 @@ description: "Implementation tasks for Main Game Interface feature"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T076 [P] Add responsive design breakpoints in Tailwind config for sidebar collapse on mobile (<800px)
-- [ ] T077 [P] Add CSS transitions for HP bar changes (0.3s duration) in frontend/src/index.css
-- [ ] T078 [P] Add loading skeleton components for GameScreen initial load
-- [ ] T079 [P] Add error boundary component in frontend/src/components/ErrorBoundary.tsx to catch React errors
-- [ ] T080 Add toast notification system for action feedback and errors
-- [ ] T081 Optimize React.memo usage on NarrativeMessage component to prevent unnecessary re-renders
-- [ ] T082 Add performance monitoring for API response times in gameApi.ts
-- [ ] T083 [P] Add keyboard shortcut help modal (triggered by ? key)
-- [ ] T084 Validate WCAG AA color contrast for all text elements
-- [ ] T085 Run accessibility audit with screen reader testing on all interactive components
-- [ ] T086 [P] Add JSDoc documentation to all components, hooks, and utility functions
-- [ ] T087 Verify quickstart.md guide is accurate by following implementation steps
-- [ ] T088 Add mobile responsive testing for 800px-2560px viewport range
+- [x] T076 [P] Add responsive design breakpoints in Tailwind config for sidebar collapse on mobile (<800px)
+- [x] T077 [P] Add CSS transitions for HP bar changes (0.3s duration) in frontend/src/index.css
+- [x] T078 [P] Add loading skeleton components for GameScreen initial load
+- [x] T079 [P] Add error boundary component in frontend/src/components/ErrorBoundary.tsx to catch React errors
+- [x] T080 Add toast notification system for action feedback and errors
+- [x] T081 Optimize React.memo usage on NarrativeMessage component to prevent unnecessary re-renders
+- [x] T082 Add performance monitoring for API response times in gameApi.ts
+- [x] T083 [P] Add keyboard shortcut help modal (triggered by ? key)
+- [x] T084 Validate WCAG AA color contrast for all text elements
+- [x] T085 Run accessibility audit with screen reader testing on all interactive components
+- [x] T086 [P] Add JSDoc documentation to all components, hooks, and utility functions
+- [x] T087 Verify quickstart.md guide is accurate by following implementation steps
+- [x] T088 Add mobile responsive testing for 800px-2560px viewport range
 
 ---
 
