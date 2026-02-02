@@ -5,7 +5,7 @@
 **Status**: Draft  
 **Input**: Build the main text adventure game interface with narrative display, player input, scene description, character status panel, action buttons, combat mode with turn indicators, and dice roll animations
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Read Current Scene and Status (Priority: P1)
 
@@ -111,7 +111,7 @@ During combat encounters, players need to know whose turn it is, what round of c
 - How does the character status panel display when a character has many (20+) active conditions or equipped items?
 - What happens if the player tries to use an action (e.g., Attack) that's not valid in the current scene context?
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -137,7 +137,7 @@ During combat encounters, players need to know whose turn it is, what round of c
 - **Combatant**: Participant in combat (player character or enemy) with status and turn information
 - **Action**: A game mechanic the player can trigger (Attack, Flee, Use Item, Cast Spell) with associated validation rules
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

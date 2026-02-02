@@ -33,9 +33,9 @@ tests/
 C# with ASP.NET Core 10: Follow standard conventions
 
 ## Recent Changes
+- 009-main-game-ui: Added TypeScript 5.9, React 18.3, Node.js 20 LTS + React Router v6, TanStack React Query v5, Tailwind CSS v4.1
 - 008-char-mgmt-ui: Added TypeScript 5.9, React 18.3, Node.js 20 LTS + React Router v6, TanStack React Query v5, Tailwind CSS v4.1
 - 007-adventure-dashboard: Added TypeScript 5.x with React 18 (JSX/TSX syntax) + React 18, Vite, React Router v6, TanStack Query (React Query), Tailwind CSS, TypeScript, Vitest, React Testing Library
-- 006-multi-stage-quests: Added C# / .NET 10.0 + ASP.NET Core 10.0, Entity Framework Core 10.0.2, Npgsql 10.0.0, Swashbuckle 7.2.0
 
 
 <!-- MANUAL ADDITIONS START -->
