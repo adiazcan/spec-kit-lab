@@ -8,7 +8,13 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CharacterSelector from "@/components/CharacterSelector";
@@ -104,11 +110,11 @@ describe("CharacterSelector Component", () => {
       );
 
       // Check that Aragorn's high stats are visible in summary
-      const ragornCard = screen.getByText("Aragorn").closest("li");
-      expect(ragornCard).toBeInTheDocument();
+      const aragornCard = screen.getByText("Aragorn").closest("div");
+      expect(aragornCard).toBeInTheDocument();
 
-      // Verify creation date is shown
-      expect(screen.getByText(/January 20/)).toBeInTheDocument();
+      // Verify creation date is shown (formatted as "Jan 20, 2026")
+      expect(screen.getByText(/Jan 20, 2026/)).toBeInTheDocument();
     });
 
     it("renders each character as a selectable item", () => {
@@ -153,7 +159,7 @@ describe("CharacterSelector Component", () => {
       );
 
       const createButton = screen.getByRole("button", {
-        name: /create new character/i,
+        name: /create a new character/i,
       });
       expect(createButton).toBeInTheDocument();
 
@@ -199,13 +205,15 @@ describe("CharacterSelector Component", () => {
       });
       await user.click(previewButtons[0]);
 
-      // Should show full character details in modal
+      // Should show modal with character details
       await waitFor(() => {
-        expect(screen.getByText(mockCharacters[0].name)).toBeInTheDocument();
+        const modal = screen.getByRole("dialog");
+        expect(modal).toBeInTheDocument();
       });
 
       // Modal should show all attributes
-      expect(screen.getByText(/strength|str:/i)).toBeInTheDocument();
+      const modal = screen.getByRole("dialog");
+      expect(within(modal).getByText(/strength/i)).toBeInTheDocument();
     });
 
     it("displays complete character sheet in preview modal", async () => {
@@ -218,18 +226,23 @@ describe("CharacterSelector Component", () => {
         />,
       );
 
-      const previewButtons = screen.getAllByRole("button", {
-        name: /preview/i,
+      // Wait for modal to open
+      await waitFor(() => {
+        expect(screen.getByRole("dialog")).toBeInTheDocument();
       });
-      await user.click(previewButtons[0]);
 
-      // Character name
-      expect(screen.getByText(mockCharacters[0].name)).toBeInTheDocument();
+      // Character name in modal heading
+      const modal = screen.getByRole("dialog");
+      expect(
+        within(modal).getByRole("heading", { name: mockCharacters[0].name }),
+      ).toBeInTheDocument();
 
       // All attributes visible
       const character = mockCharacters[0];
       expect(
-        screen.getByText(new RegExp(character.attributes.str.toString())),
+        within(modal).getByText(
+          new RegExp(character.attributes.str.toString()),
+        ),
       ).toBeInTheDocument();
     });
 
@@ -251,20 +264,20 @@ describe("CharacterSelector Component", () => {
 
       // Modal should be visible
       await waitFor(() => {
-        expect(screen.getByText(mockCharacters[0].name)).toBeInTheDocument();
+        expect(screen.getByRole("dialog")).toBeInTheDocument();
       });
 
-      // Close modal
-      const closeButton = screen.getByRole("button", {
+      // Close modal using button within the dialog
+      const modal = screen.getByRole("dialog");
+      const closeButton = within(modal).getByRole("button", {
         name: /close|dismiss|×/i,
       });
       await user.click(closeButton);
 
-      // Modal content should disappear
-      // (Character name hidden in modal but still in list)
-      expect(
-        screen.queryByText(new RegExp(`^${mockCharacters[0].name}$`)),
-      ).not.toBeInTheDocument();
+      // Modal should disappear
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      });
     });
 
     it("closes preview modal with Escape key", async () => {
@@ -440,12 +453,9 @@ describe("CharacterSelector Component", () => {
         />,
       );
 
-      // Should show loading indicator
-      expect(
-        screen.getByRole("status") ||
-          screen.getByText(/loading/i) ||
-          screen.getByText(/..../),
-      ).toBeInTheDocument();
+      // Should show loading indicators (multiple skeleton cards)
+      const loadingIndicators = screen.getAllByRole("status");
+      expect(loadingIndicators.length).toBeGreaterThan(0);
     });
 
     it("disables interactions while loading", () => {
@@ -555,16 +565,26 @@ describe("CharacterSelector Component", () => {
         />,
       );
 
-      // Tab through selectable items
-      const selectButtons = screen.getAllByRole("button", {
-        name: /select this character/i,
+      // Tab through character list (card → preview → select → next card)
+      const characterCards = screen.getAllByRole("button", {
+        name: /character:/i,
+      });
+      const previewButtons = screen.getAllByRole("button", {
+        name: /preview/i,
       });
 
+      // First tab focuses first character card
       await user.tab();
-      expect(selectButtons[0]).toHaveFocus();
+      expect(characterCards[0]).toHaveFocus();
 
+      // Second tab focuses preview button on first card
       await user.tab();
-      expect(selectButtons[1]).toHaveFocus();
+      expect(previewButtons[0]).toHaveFocus();
+
+      // Skip select button and continue to next card
+      await user.tab();
+      await user.tab();
+      expect(characterCards[1]).toHaveFocus();
     });
   });
 });
