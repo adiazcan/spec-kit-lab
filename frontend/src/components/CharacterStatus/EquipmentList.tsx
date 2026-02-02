@@ -1,0 +1,112 @@
+import React, { memo } from "react";
+import type { EquippedItem } from "../../types/combat";
+
+/**
+ * EquipmentList - Displays equipped items and their stat impacts
+ * T081: Optimized with React.memo to prevent unnecessary re-renders
+ * T086: Enhanced with comprehensive JSDoc documentation
+ *
+ * Features:
+ * - Organized by equipment slot (Main Hand, Off Hand, Armor, Accessory)
+ * - Shows stat impacts for each item (+5 damage, AC 12, etc.)
+ * - Type-specific icons and styling
+ * - Empty state messaging
+ * - Responsive item arrangement
+ *
+ * Equipment Slots:
+ * - mainHand: Weapon in main hand (⚔️)\n * - offHand: Weapon/shield in off hand (🛡️)
+ * - armor: Body armor (🧥)
+ * - accessory: Rings, amulets, etc. (💍)
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {EquippedItem[]} props.equipment - Array of equipped items to display
+ *
+ * @example
+ * ```tsx
+n * const equipment: EquippedItem[] = [
+ *   { name: \"Longsword\", slot: \"mainHand\", statImpact: \"+5 damage\", icon: \"⚔️\" },
+ *   { name: \"Shield\", slot: \"offHand\", statImpact: \"AC +2\", icon: \"🛡️\" }
+ * ];
+ * <EquipmentList equipment={equipment} />
+ * ```
+ */
+interface EquipmentListProps {
+  /** Array of equipped items (0 or more items) */
+  equipment: EquippedItem[];
+}
+
+const getSlotLabel = (
+  slot: EquippedItem["slot"],
+): { label: string; icon: string } => {
+  switch (slot) {
+    case "mainHand":
+      return { label: "Main Hand", icon: "⚔️" };
+    case "offHand":
+      return { label: "Off Hand", icon: "🛡️" };
+    case "armor":
+      return { label: "Armor", icon: "🧥" };
+    case "accessory":
+      return { label: "Accessory", icon: "💍" };
+    default:
+      return { label: slot, icon: "📦" };
+  }
+};
+
+/**
+ * Memoized component - only re-renders when equipment actually changes
+ */
+export const EquipmentList: React.FC<EquipmentListProps> = memo(
+  ({ equipment }) => {
+    if (equipment.length === 0) {
+      return (
+        <div className="bg-gray-900 p-4 border-b border-gray-700">
+          <h4 className="text-sm font-semibold text-gray-400 mb-2">
+            EQUIPMENT
+          </h4>
+          <p className="text-xs text-gray-500">No items equipped</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-gray-900 p-4 border-b border-gray-700">
+        <h4 className="text-sm font-semibold text-gray-300 mb-3">EQUIPMENT</h4>
+        <div className="space-y-2">
+          {equipment.map((item) => {
+            const { label, icon } = getSlotLabel(item.slot);
+            return (
+              <div
+                key={`${item.slot}-${item.name}`}
+                className="bg-gray-800 p-2 rounded text-xs"
+              >
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <span className="font-semibold text-white">
+                    {item.icon || icon} {item.name}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">{label}</span>
+                  <span className="text-amber-300 font-semibold">
+                    {item.statImpact}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Memoization: re-render only if equipment array actually changed
+    if (prevProps.equipment.length !== nextProps.equipment.length) {
+      return false;
+    }
+    return prevProps.equipment.every(
+      (item, idx) =>
+        item.name === nextProps.equipment[idx].name &&
+        item.slot === nextProps.equipment[idx].slot,
+    );
+  },
+);

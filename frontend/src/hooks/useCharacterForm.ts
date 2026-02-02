@@ -48,6 +48,7 @@ export interface UseCharacterFormReturn {
   updateAttribute: (attr: keyof Attributes, value: number) => void;
   updateName: (name: string) => void;
   setFormData: (data: CharacterFormData) => void;
+  setErrors: (errors: Record<string, string>) => void;
 
   // Validation
   validate: () => boolean;
@@ -250,6 +251,7 @@ export function useCharacterForm(
     updateAttribute,
     updateName,
     setFormData,
+    setErrors,
     validate,
     clearErrors,
     resetForm,

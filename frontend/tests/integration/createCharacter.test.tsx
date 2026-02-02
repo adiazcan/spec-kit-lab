@@ -93,7 +93,9 @@ describe("Character Creation Integration Tests", () => {
       await user.type(dexInput, "12");
 
       // Submit form
-      const submitButton = screen.getByRole("button", { name: /save/i });
+      const submitButton = screen.getByRole("button", {
+        name: /create character/i,
+      });
       await user.click(submitButton);
 
       // Verify navigation happens after successful creation
@@ -110,7 +112,9 @@ describe("Character Creation Integration Tests", () => {
       renderWithProviders(<CharacterCreatePage />);
 
       // Try to submit without name
-      const submitButton = screen.getByRole("button", { name: /save/i });
+      const submitButton = screen.getByRole("button", {
+        name: /create character/i,
+      });
       await user.click(submitButton);
 
       // Should show error
@@ -132,7 +136,9 @@ describe("Character Creation Integration Tests", () => {
       await user.clear(intInput);
       await user.type(intInput, "10");
 
-      const submitButton = screen.getByRole("button", { name: /save/i });
+      const submitButton = screen.getByRole("button", {
+        name: /create character/i,
+      });
       await user.click(submitButton);
 
       // Just verify the form can submit (real API errors would require more setup)
@@ -155,22 +161,27 @@ describe("Character Creation Integration Tests", () => {
 
       renderWithProviders(<CharacterCreatePage />);
 
-      // Switch to dice roll mode
-      const diceRollRadio = screen.getByLabelText(/^Dice Roll/i);
+      // Switch to dice roll mode (no confirmation dialog yet as form is empty)
+      const diceRollRadio = screen.getByRole("radio", { name: /dice roll/i });
       await user.click(diceRollRadio);
 
       // Enter character name
       const nameInput = screen.getByLabelText(/character name/i);
       await user.type(nameInput, "Frodo");
 
-      // Roll attributes
-      const rollButtons = screen.getAllByRole("button", { name: /roll/i });
-      for (const button of rollButtons.slice(0, 5)) {
+      // Roll attributes - buttons have "Roll 4d6" text
+      const rollButtons = screen.getAllByRole("button", { name: /roll 4d6/i });
+      expect(rollButtons.length).toBe(5);
+      for (const button of rollButtons) {
         await user.click(button);
+        // Wait for roll animation to complete
+        await new Promise((resolve) => setTimeout(resolve, 700));
       }
 
       // Submit form
-      const submitButton = screen.getByRole("button", { name: /save|create/i });
+      const submitButton = screen.getByRole("button", {
+        name: /create character/i,
+      });
       await user.click(submitButton);
 
       // Verify navigation happens
@@ -179,32 +190,36 @@ describe("Character Creation Integration Tests", () => {
           expect.stringContaining("/characters/"),
         );
       });
-    });
+    }, 15000); // Increase timeout for dice roll animations
 
     it("should prevent submission until all attributes are rolled", async () => {
       const user = userEvent.setup();
 
       renderWithProviders(<CharacterCreatePage />);
 
+      // Switch to dice roll mode first (before entering name to avoid confirmation)
+      const diceRollRadio = screen.getByRole("radio", { name: /dice roll/i });
+      await user.click(diceRollRadio);
+
       const nameInput = screen.getByLabelText(/character name/i);
       await user.type(nameInput, "Frodo");
 
-      // Switch to dice roll mode
-      const diceRollRadio = screen.getByLabelText(/dice roll/i);
-      await user.click(diceRollRadio);
-
       // Roll only one attribute
-      const firstRollButton = screen.getAllByRole("button", {
-        name: /roll/i,
-      })[0];
-      await user.click(firstRollButton);
+      const rollButtons = screen.getAllByRole("button", { name: /roll 4d6/i });
+      await user.click(rollButtons[0]);
+      // Wait for roll animation
+      await new Promise((resolve) => setTimeout(resolve, 700));
 
       // Try to submit
-      const submitButton = screen.getByRole("button", { name: /save/i });
+      const submitButton = screen.getByRole("button", {
+        name: /create character/i,
+      });
       await user.click(submitButton);
 
-      // Should show error
-      expect(screen.getByText(/roll all attributes/i)).toBeInTheDocument();
-    });
+      // Should show error indicating all attributes need to be rolled
+      await waitFor(() => {
+        expect(screen.getByText(/roll all attributes/i)).toBeInTheDocument();
+      });
+    }, 10000);
   });
 });

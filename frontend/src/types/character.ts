@@ -4,6 +4,8 @@
  * Based on D&D 5E attribute system (3-18 range for attributes)
  */
 
+import type { EquippedItem, ActiveCondition } from "./combat";
+
 /**
  * Attribute keys for type safety when accessing character attributes
  */
@@ -221,3 +223,37 @@ export const POINT_BUY_CONSTRAINTS = {
   POOL: 27,
   STARTING_ATTRIBUTE: 8,
 } as const;
+
+/**
+ * Character status for display in game UI sidebar
+ * Contains all the information needed for the character status panel.
+ */
+export interface CharacterStatus {
+  /** Character unique ID */
+  characterId: string;
+
+  /** Character name */
+  name: string;
+
+  /** Current hit points */
+  currentHp: number;
+
+  /** Maximum hit points */
+  maxHp: number;
+
+  /** Equipped items */
+  equipment: EquippedItem[];
+
+  /** Active status effects/conditions */
+  conditions: ActiveCondition[];
+
+  /** Core attributes (for display, not modification) */
+  attributes?: {
+    strength: number;
+    dexterity: number;
+    constitution: number;
+    intelligence: number;
+    wisdom: number;
+    charisma: number;
+  };
+}
