@@ -122,8 +122,8 @@ const AttributeRollInput: React.FC<AttributeRollInputProps> = ({
   const modifier = isRolled ? calculateModifier(value) : 0;
 
   const handleRoll = async () => {
-    await rollAttribute(attribute);
-    onRoll(attribute, currentRoll?.sum || 0);
+    const rolledValue = await rollAttribute(attribute);
+    onRoll(attribute, rolledValue);
   };
 
   return (

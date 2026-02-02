@@ -126,12 +126,8 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
     }
 
     // Set errors in form state
-    if (Object.keys(errors).length > 0) {
-      form.setFormData({ ...form.formData });
-      return false;
-    }
-
-    return true;
+    form.setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   /**

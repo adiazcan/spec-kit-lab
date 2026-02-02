@@ -31,9 +31,9 @@ export interface UseDiceRollReturn {
   rollAnimationTime: number;
 
   // Methods
-  rollAttribute: (attributeName: string) => Promise<void>;
+  rollAttribute: (attributeName: string) => Promise<number>;
   rollAllAttributes: (attributeNames: string[]) => Promise<void>;
-  rerollAttribute: (attributeName: string) => Promise<void>;
+  rerollAttribute: (attributeName: string) => Promise<number>;
   getRolledValue: (attributeName: string) => number | undefined;
   hasRolled: (attributeName: string) => boolean;
   resetRolls: () => void;
@@ -91,14 +91,15 @@ export function useDiceRoll(animationTime: number = 600): UseDiceRollReturn {
    * Shows animation, then stores the result
    *
    * @param attributeName - Name of attribute to roll (e.g., 'str', 'dex')
+   * @returns The rolled value (3-18)
    * @example
    * ```typescript
-   * await dice.rollAttribute('str');
-   * console.log(dice.rolledValues.str); // 3-18
+   * const value = await dice.rollAttribute('str');
+   * console.log(value); // 3-18
    * ```
    */
   const rollAttribute = useCallback(
-    async (attributeName: string): Promise<void> => {
+    async (attributeName: string): Promise<number> => {
       setIsRolling(true);
 
       // Perform the dice roll
@@ -119,6 +120,9 @@ export function useDiceRoll(animationTime: number = 600): UseDiceRollReturn {
 
       // Animation complete
       setIsRolling(false);
+
+      // Return the rolled value
+      return roll.sum;
     },
     [animationTime],
   );
@@ -149,16 +153,17 @@ export function useDiceRoll(animationTime: number = 600): UseDiceRollReturn {
    * Re-roll a specific attribute (overwrites previous roll)
    *
    * @param attributeName - Attribute to re-roll
+   * @returns The new rolled value (3-18)
    * @example
    * ```typescript
    * // User doesn't like their STR roll
-   * await dice.rerollAttribute('str');
-   * // New value now in dice.rolledValues.str
+   * const newValue = await dice.rerollAttribute('str');
+   * // newValue is the new rolled value
    * ```
    */
   const rerollAttribute = useCallback(
-    async (attributeName: string): Promise<void> => {
-      await rollAttribute(attributeName);
+    async (attributeName: string): Promise<number> => {
+      return await rollAttribute(attributeName);
     },
     [rollAttribute],
   );
