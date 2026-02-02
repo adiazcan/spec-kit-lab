@@ -13,6 +13,9 @@ import type { CharacterStatus } from "./character";
 import type { CombatState } from "./combat";
 import type { NarrativeMessage } from "./narrative";
 
+// Re-export types for convenience
+export type { CombatState };
+
 /**
  * Complete game state including scene, character, combat, and UI state.
  * This is the root state container for the game screen.

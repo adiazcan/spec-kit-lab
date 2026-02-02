@@ -31,7 +31,7 @@ import { CommandInput } from "../components/CommandInput/CommandInput";
 import { ActionButtons } from "../components/CommandInput/ActionButtons";
 import type { SceneData } from "../types/narrative";
 import type { CharacterStatus } from "../types/character";
-import type { CombatState } from "../types/game";
+import type { CombatState } from "../types/combat";
 
 /**
  * GamePage component - Main game interface entry point
@@ -327,7 +327,7 @@ export default function GamePage() {
         {/* Quick Action Buttons (only visible in combat) */}
         <div className="mb-3">
           <ActionButtons
-            combatState={combatQuery.data || null}
+            combatState={(combatQuery.data as CombatState) || null}
             character={characterStatus}
             disabled={!gameState.uiState.inputEnabled}
             onActionSubmitted={(action, result) => {
