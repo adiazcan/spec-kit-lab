@@ -24,6 +24,7 @@ const CharacterEditPage_Lazy = lazy(() => import("./pages/CharacterEditPage"));
 const CharacterSheetPage_Lazy = lazy(
   () => import("./pages/CharacterSheetPage"),
 );
+const InventoryPage_Lazy = lazy(() => import("./pages/InventoryPage"));
 
 /**
  * T121: Network error retry logic with exponential backoff
@@ -168,6 +169,20 @@ const router = createBrowserRouter([
             }
           >
             <CharacterSheetPage_Lazy />
+          </Suspense>
+        ),
+      },
+      {
+        path: "game/:adventureId/inventory",
+        element: (
+          <Suspense
+            fallback={
+              <div className="max-w-7xl mx-auto mt-8">
+                <LoadingSkeleton count={8} variant="list" />
+              </div>
+            }
+          >
+            <InventoryPage_Lazy />
           </Suspense>
         ),
       },
