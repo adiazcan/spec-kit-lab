@@ -8,6 +8,12 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false,
+    proxy: {
+      "/api": {
+        target: "http://localhost:5204",
+        changeOrigin: true,
+      },
+    },
   },
   optimizeDeps: {
     include: ["react", "react-dom", "@tanstack/react-query"],

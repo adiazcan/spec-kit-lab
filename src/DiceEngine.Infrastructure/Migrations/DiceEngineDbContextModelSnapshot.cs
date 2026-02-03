@@ -392,6 +392,28 @@ namespace DiceEngine.Infrastructure.Migrations
                     b.ToTable("equipment_slots", (string)null);
                 });
 
+            modelBuilder.Entity("DiceEngine.Domain.Entities.FailureCondition", b =>
+                {
+                    b.Property<Guid>("FailureConditionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ConditionType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("StageId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("FailureConditionId");
+
+                    b.HasIndex("StageId");
+
+                    b.ToTable("failure_conditions", (string)null);
+                });
+
             modelBuilder.Entity("DiceEngine.Domain.Entities.InventoryEntry", b =>
                 {
                     b.Property<Guid>("Id")
@@ -505,6 +527,276 @@ namespace DiceEngine.Infrastructure.Migrations
                     b.HasIndex("LootTableId");
 
                     b.ToTable("loot_table_entries", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.ObjectiveProgress", b =>
+                {
+                    b.Property<Guid>("ObjectiveProgressId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CurrentProgress")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ObjectiveId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StageProgressId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TargetAmount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ObjectiveProgressId");
+
+                    b.HasIndex("ObjectiveId");
+
+                    b.HasIndex("StageProgressId");
+
+                    b.ToTable("objective_progress", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.Quest", b =>
+                {
+                    b.Property<Guid>("QuestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int>("Difficulty")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MaxConcurrentPlayers")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("QuestId");
+
+                    b.HasIndex("Difficulty");
+
+                    b.HasIndex("Name");
+
+                    b.ToTable("quests", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestDependency", b =>
+                {
+                    b.Property<Guid>("DependencyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DependentQuestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PrerequisiteQuestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("DependencyId");
+
+                    b.HasIndex("PrerequisiteQuestId");
+
+                    b.HasIndex("DependentQuestId", "PrerequisiteQuestId")
+                        .IsUnique();
+
+                    b.ToTable("quest_dependencies", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestObjective", b =>
+                {
+                    b.Property<Guid>("ObjectiveId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ConditionType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("ObjectiveNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("TargetAmount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ObjectiveId");
+
+                    b.HasIndex("StageId", "ObjectiveNumber")
+                        .IsUnique();
+
+                    b.ToTable("quest_objectives", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestProgress", b =>
+                {
+                    b.Property<Guid>("QuestProgressId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("AbandonedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CurrentStageNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("FailedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("QuestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("QuestProgressId");
+
+                    b.HasIndex("QuestId");
+
+                    b.HasIndex("PlayerId", "QuestId")
+                        .IsUnique();
+
+                    b.HasIndex("PlayerId", "Status");
+
+                    b.ToTable("quest_progress", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestReward", b =>
+                {
+                    b.Property<Guid>("RewardId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ItemId")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<Guid?>("QuestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("StageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RewardId");
+
+                    b.HasIndex("QuestId");
+
+                    b.HasIndex("StageId");
+
+                    b.ToTable("quest_rewards", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestStage", b =>
+                {
+                    b.Property<Guid>("StageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("QuestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("StageNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("StageId");
+
+                    b.HasIndex("QuestId", "StageNumber")
+                        .IsUnique();
+
+                    b.ToTable("quest_stages", (string)null);
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.StageProgress", b =>
+                {
+                    b.Property<Guid>("StageProgressId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("QuestProgressId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("StageNumber")
+                        .HasColumnType("integer");
+
+                    b.HasKey("StageProgressId");
+
+                    b.HasIndex("QuestProgressId");
+
+                    b.HasIndex("StageId");
+
+                    b.ToTable("stage_progress", (string)null);
                 });
 
             modelBuilder.Entity("DiceEngine.Domain.ValueObjects.AttackAction", b =>
@@ -659,6 +951,17 @@ namespace DiceEngine.Infrastructure.Migrations
                     b.Navigation("EquippedItem");
                 });
 
+            modelBuilder.Entity("DiceEngine.Domain.Entities.FailureCondition", b =>
+                {
+                    b.HasOne("DiceEngine.Domain.Entities.QuestStage", "Stage")
+                        .WithMany("FailureConditions")
+                        .HasForeignKey("StageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stage");
+                });
+
             modelBuilder.Entity("DiceEngine.Domain.Entities.InventoryEntry", b =>
                 {
                     b.HasOne("DiceEngine.Domain.Entities.Adventure", "Adventure")
@@ -697,6 +1000,113 @@ namespace DiceEngine.Infrastructure.Migrations
                     b.Navigation("LootTable");
                 });
 
+            modelBuilder.Entity("DiceEngine.Domain.Entities.ObjectiveProgress", b =>
+                {
+                    b.HasOne("DiceEngine.Domain.Entities.QuestObjective", "Objective")
+                        .WithMany()
+                        .HasForeignKey("ObjectiveId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DiceEngine.Domain.Entities.StageProgress", "StageProgress")
+                        .WithMany("ObjectiveProgress")
+                        .HasForeignKey("StageProgressId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Objective");
+
+                    b.Navigation("StageProgress");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestDependency", b =>
+                {
+                    b.HasOne("DiceEngine.Domain.Entities.Quest", "DependentQuest")
+                        .WithMany("Dependencies")
+                        .HasForeignKey("DependentQuestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DiceEngine.Domain.Entities.Quest", "PrerequisiteQuest")
+                        .WithMany("DependentQuests")
+                        .HasForeignKey("PrerequisiteQuestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DependentQuest");
+
+                    b.Navigation("PrerequisiteQuest");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestObjective", b =>
+                {
+                    b.HasOne("DiceEngine.Domain.Entities.QuestStage", "Stage")
+                        .WithMany("Objectives")
+                        .HasForeignKey("StageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stage");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestProgress", b =>
+                {
+                    b.HasOne("DiceEngine.Domain.Entities.Quest", "Quest")
+                        .WithMany()
+                        .HasForeignKey("QuestId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Quest");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestReward", b =>
+                {
+                    b.HasOne("DiceEngine.Domain.Entities.Quest", "Quest")
+                        .WithMany("Rewards")
+                        .HasForeignKey("QuestId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("DiceEngine.Domain.Entities.QuestStage", "Stage")
+                        .WithMany("StageRewards")
+                        .HasForeignKey("StageId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Quest");
+
+                    b.Navigation("Stage");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestStage", b =>
+                {
+                    b.HasOne("DiceEngine.Domain.Entities.Quest", "Quest")
+                        .WithMany("Stages")
+                        .HasForeignKey("QuestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quest");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.StageProgress", b =>
+                {
+                    b.HasOne("DiceEngine.Domain.Entities.QuestProgress", "QuestProgress")
+                        .WithMany("StageProgress")
+                        .HasForeignKey("QuestProgressId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DiceEngine.Domain.Entities.QuestStage", "Stage")
+                        .WithMany()
+                        .HasForeignKey("StageId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("QuestProgress");
+
+                    b.Navigation("Stage");
+                });
+
             modelBuilder.Entity("DiceEngine.Domain.ValueObjects.AttackAction", b =>
                 {
                     b.HasOne("DiceEngine.Domain.Entities.CombatEncounter", null)
@@ -723,6 +1133,36 @@ namespace DiceEngine.Infrastructure.Migrations
             modelBuilder.Entity("DiceEngine.Domain.Entities.LootTable", b =>
                 {
                     b.Navigation("Entries");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.Quest", b =>
+                {
+                    b.Navigation("Dependencies");
+
+                    b.Navigation("DependentQuests");
+
+                    b.Navigation("Rewards");
+
+                    b.Navigation("Stages");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestProgress", b =>
+                {
+                    b.Navigation("StageProgress");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.QuestStage", b =>
+                {
+                    b.Navigation("FailureConditions");
+
+                    b.Navigation("Objectives");
+
+                    b.Navigation("StageRewards");
+                });
+
+            modelBuilder.Entity("DiceEngine.Domain.Entities.StageProgress", b =>
+                {
+                    b.Navigation("ObjectiveProgress");
                 });
 #pragma warning restore 612, 618
         }
