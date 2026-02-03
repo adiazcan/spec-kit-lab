@@ -57,14 +57,13 @@ export function filterInventory(
     }
 
     // Filter equipped state
-    if (filters.includeEquipped === false) {
-      // If includeEquipped is explicitly false, exclude equipped items
-      // In a real scenario, we'd check if the item is in the equipment slots
-      // For now, we just check if it's a unique item (equipment)
-      if (entry.item.itemType === "Unique" && entry.item.slotType) {
-        return false;
-      }
-    }
+    // Note: This filter requires actual equipment state to work correctly.
+    // The current implementation cannot distinguish between equipped and unequipped
+    // items without access to the equipment slots data. This should be handled
+    // at a higher level (e.g., in useInventory hook) where both inventory and
+    // equipment state are available.
+    // TODO: Remove this filter from this utility and handle it in the hook layer
+    // where equipped status can be determined by cross-referencing equipment slots.
 
     return true;
   });
