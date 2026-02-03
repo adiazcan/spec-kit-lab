@@ -275,7 +275,7 @@ export const inventoryClient = {
    */
   async getStatistics(adventureId: string): Promise<{
     totalItems: number;
-    totalStackeable: number;
+    totalStackable: number;
     totalUnique: number;
     slotUsage: Record<string, number>;
     rarityDistribution: Record<string, number>;
