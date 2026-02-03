@@ -16,6 +16,8 @@ Auto-generated from all feature plans. Last updated: 2026-01-27
 - Backend managed (PostgreSQL via .NET Entity Framework) (008-char-mgmt-ui)
 - TypeScript 5.9 + React 18.3.1 (ES2020) + React 18, React Router 6.30, React Query 5.90, Tailwind CSS 4.1, Vite 5.4 (010-inventory-ui)
 - N/A (state management via React Query, API calls to .NET backend) (010-inventory-ui)
+- TypeScript 5.x, React 18.x + React, TypeScript, Tailwind CSS, React Router, Axios (HTTP client) (011-quest-tracking-ui)
+- Backend (.NET/PostgreSQL), accessed via REST API (011-quest-tracking-ui)
 
 - C# with ASP.NET Core 10 + ASP.NET Core 10 Web API, Entity Framework Core, PostgreSQL (001-dice-engine)
 
@@ -35,9 +37,9 @@ tests/
 C# with ASP.NET Core 10: Follow standard conventions
 
 ## Recent Changes
+- 011-quest-tracking-ui: Added TypeScript 5.x, React 18.x + React, TypeScript, Tailwind CSS, React Router, Axios (HTTP client)
 - 010-inventory-ui: Added TypeScript 5.9 + React 18.3.1 (ES2020) + React 18, React Router 6.30, React Query 5.90, Tailwind CSS 4.1, Vite 5.4
 - 009-main-game-ui: Added TypeScript 5.9, React 18.3, Node.js 20 LTS + React Router v6, TanStack React Query v5, Tailwind CSS v4.1
-- 008-char-mgmt-ui: Added TypeScript 5.9, React 18.3, Node.js 20 LTS + React Router v6, TanStack React Query v5, Tailwind CSS v4.1
 
 
 <!-- MANUAL ADDITIONS START -->

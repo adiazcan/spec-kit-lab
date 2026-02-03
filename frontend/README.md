@@ -89,24 +89,41 @@ src/
 │   ├── CharacterList/
 │   │   └── CharacterListItem.tsx # Individual character in list
 │   │
-│   └── CharacterSelector.tsx    # Adventure character selection
-│       └── CharacterSelector/
-│           ├── CharacterPreviewCard.tsx
-│           └── CharacterPreviewModal.tsx
+│   ├── CharacterSelector.tsx    # Adventure character selection
+│   │   └── CharacterSelector/
+│   │       ├── CharacterPreviewCard.tsx
+│   │       └── CharacterPreviewModal.tsx
+│   │
+│   └── quest-tracking/          # Quest tracking feature (Phase 8-9)
+│       ├── QuestList.tsx        # Main quest list container
+│       ├── QuestListItem.tsx    # Individual quest in list
+│       ├── QuestDetail.tsx      # Quest detail modal/panel
+│       ├── QuestFilter.tsx      # Filter controls
+│       ├── ObjectiveItem.tsx    # Individual objective display
+│       ├── ProgressBar.tsx      # Progress indicator component
+│       ├── RewardDisplay.tsx    # Quest rewards display
+│       ├── CompletedQuests.tsx  # Quest history view
+│       ├── CompletedQuestsHistory.tsx # Detailed history
+│       ├── ActiveQuestsList.tsx # Active quests list
+│       ├── index.ts             # Barrel export
+│       └── README.md            # Component documentation
 │
 ├── hooks/
 │   ├── useAdventures.ts         # TanStack Query hooks for adventures
 │   ├── useCharacterForm.ts      # Form state management for characters
-│   └── useDiceRoll.ts           # Dice roll logic hook
+│   ├── useDiceRoll.ts           # Dice roll logic hook
+│   └── useQuestTracking.ts      # Quest state management hook
 │
 ├── services/
 │   ├── api.ts                   # Base HTTP client
 │   ├── characterApi.ts          # Character API with React Query hooks
+│   ├── questService.ts          # Quest API client
 │   ├── attributeCalculator.ts   # D&D modifier calculations
 │   └── diceRoller.ts            # Dice rolling utilities
 │
 ├── types/
 │   ├── character.ts             # Character interfaces and validation
+│   ├── quest.ts                 # Quest tracking types and utilities
 │   └── api.ts                   # Generated OpenAPI types
 │
 └── utils/
@@ -197,6 +214,42 @@ VITE_MOCK_API=false
 - Touch targets 44x44px minimum
 - 4.5:1 color contrast ratios
 - Performance optimized (<100ms modifiers, <3s load)
+
+### ✅ Phase 8-9: Quest Tracking Interface (User Stories 1-6)
+
+**Backend Integration & API Client**
+
+- RESTful API service (`questService.ts`) with full TypeScript types
+- Quest endpoints: list, details, active quests, dependencies
+- Accept/abandon quest mutations with optimistic updates
+- Error handling with user-friendly messages
+- React Query integration for caching (5-min stale time)
+
+**Core Quest Tracking UI (MVP)**
+
+- **Quest List**: Display all active quests with status badges
+- **Quest Details**: Full quest information with multi-stage support
+- **Progress Indicators**: Visual progress bars and percentage counters
+- **Objective Tracking**: Individual objectives with completion status
+- **Stage Management**: Multi-stage quests with navigation
+
+**Quest Management Features**
+
+- **Status Filtering**: Filter quests by Active/Completed/Failed status
+- **Search**: Search quests by name and description
+- **Quest History**: View completed quests with completion dates
+- **Reward Display**: Show quest rewards by type (Experience, Item, Currency, Achievement)
+- **Quest Actions**: Accept/abandon quests with proper state management
+
+**State Management & Performance**
+
+- Custom `useQuestTracking` hook for centralized state
+- React Query for server state with automatic cache management
+- Memoized filtering and sorting operations
+- Lazy loading of quest details
+- <500ms quest detail load time target
+
+See [quest-tracking/README.md](./src/components/quest-tracking/README.md) for detailed component documentation
 
 ## Accessibility
 
