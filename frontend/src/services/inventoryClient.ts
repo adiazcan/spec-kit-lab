@@ -363,7 +363,7 @@ export function getApiBaseUrl(): string {
 }
 
 /**
- * Helper function to construc full API URL
+ * Helper function to construct full API URL
  */
 export function getFullApiUrl(endpoint: string): string {
   return `${API_BASE}${endpoint}`;
