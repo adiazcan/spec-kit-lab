@@ -157,7 +157,7 @@ public class AdventuresController : ControllerBase
     private CommandResult ProcessCommand(string? command, AdventureDto adventure)
     {
         var cmd = (command ?? "").Trim().ToLowerInvariant();
-        
+
         return cmd switch
         {
             "help" => new CommandResult
