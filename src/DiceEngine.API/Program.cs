@@ -11,6 +11,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Configure options
 builder.Services.Configure<QuestOptions>(builder.Configuration.GetSection("Quest"));
 
+// Configure CORS for frontend development
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5000")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -79,8 +90,14 @@ builder.Services.AddScoped<IRewardService, RewardService>();
 builder.Services.AddScoped<IConditionEvaluator, ConditionEvaluator>();
 builder.Services.AddScoped<IDependencyResolver, DependencyResolver>();
 
+// Configure Npgsql with dynamic JSON support for Dictionary<string, object>
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var dataSourceBuilder = new Npgsql.NpgsqlDataSourceBuilder(connectionString);
+dataSourceBuilder.EnableDynamicJson();
+var dataSource = dataSourceBuilder.Build();
+
 builder.Services.AddDbContext<DiceEngineDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(dataSource));
 
 var app = builder.Build();
 
@@ -91,6 +108,9 @@ if (app.Environment.IsDevelopment())
     var context = scope.ServiceProvider.GetRequiredService<DiceEngineDbContext>();
     await SeedData.InitializeAsync(context);
 }
+
+// Enable CORS
+app.UseCors("AllowFrontend");
 
 // Enable Swagger UI in all environments for demonstration purposes
 app.UseSwagger();
